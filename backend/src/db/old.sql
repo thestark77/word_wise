@@ -2,7 +2,6 @@ CREATE DATABASE IF NOT EXISTS institucion_educativa;
 
 USE institucion_educativa;
 
-
 CREATE TABLE `institucion_educativa` (
   `id_institucion_educativa` int PRIMARY KEY AUTO_INCREMENT,
   `nombre_institucion_educativa` varchar(100) NOT NULL,
@@ -166,7 +165,7 @@ CREATE TABLE `matricula_academica` (
 CREATE TABLE `curso` (
   `id` int PRIMARY KEY AUTO_INCREMENT,
   `fk_id_oferta_academica` int NOT NULL,
-  `fk_id_asignatura` int NOT NULL
+  `fk_id_asignatura` int NOT NULL,
 );
 
 CREATE TABLE `grupo` (
@@ -188,21 +187,6 @@ CREATE TABLE `historial_academico` (
   `fk_id_grupo` int NOT NULL,
   `fk_id_estudiante` int NOT NULL,
   `nota_estudiante_curso` float
-);
-
-CREATE TABLE `nota_estudiante_asignatura_matriculada` (
-  `id` int PRIMARY KEY AUTO_INCREMENT,
-  `fk_id_estudiante` int,
-  `fk_id_matricula_academica` int NOT NULL,
-  `fk_id_asignatura` int NOT NULL,
-  `nota_final_estudiante_asignatura` int
-);
-
-CREATE TABLE `creditos_aprobados_estudiante_programa_academico` (
-  `id` int PRIMARY KEY AUTO_INCREMENT,
-  `fk_id_estudiante` int,
-  `fk_id_programa_academico` int NOT NULL,
-  `total_creditos_aprobados` int
 );
 
 CREATE TABLE `prerequisitos_asignatura` (
@@ -261,19 +245,17 @@ CREATE UNIQUE INDEX `horario_clase_index_8` ON `horario_clase` (`fk_id_clase_dia
 
 CREATE UNIQUE INDEX `historial_academico_index_9` ON `historial_academico` (`fk_id_grupo`, `fk_id_estudiante`);
 
-CREATE UNIQUE INDEX `creditos_aprobados_estudiante_programa_academico_index_10` ON `creditos_aprobados_estudiante_programa_academico` (`fk_id_estudiante`, `fk_id_programa_academico`);
+CREATE UNIQUE INDEX `prerequisitos_asignatura_index_10` ON `prerequisitos_asignatura` (`fk_id_asignatura`, `fk_id_asignatura_prerequisito`);
 
-CREATE UNIQUE INDEX `prerequisitos_asignatura_index_11` ON `prerequisitos_asignatura` (`fk_id_asignatura`, `fk_id_asignatura_prerequisito`);
+CREATE UNIQUE INDEX `rol_permiso_index_11` ON `rol_permiso` (`fk_id_rol`, `fk_id_permiso`);
 
-CREATE UNIQUE INDEX `rol_permiso_index_12` ON `rol_permiso` (`fk_id_rol`, `fk_id_permiso`);
+CREATE UNIQUE INDEX `asignacion_roles_index_12` ON `asignacion_roles` (`fk_id_usuario`, `fk_id_rol`);
 
-CREATE UNIQUE INDEX `asignacion_roles_index_13` ON `asignacion_roles` (`fk_id_usuario`, `fk_id_rol`);
+CREATE UNIQUE INDEX `docente_asignatura_index_13` ON `docente_asignatura` (`fk_id_docente`, `fk_id_asignatura`);
 
-CREATE UNIQUE INDEX `docente_asignatura_index_14` ON `docente_asignatura` (`fk_id_docente`, `fk_id_asignatura`);
+CREATE UNIQUE INDEX `pensum_programa_academico_index_14` ON `pensum_programa_academico` (`fk_id_programa_academico`, `fk_id_asignatura`);
 
-CREATE UNIQUE INDEX `pensum_programa_academico_index_15` ON `pensum_programa_academico` (`fk_id_programa_academico`, `fk_id_asignatura`);
-
-CREATE UNIQUE INDEX `detalle_administrativo_cargo_administrativo_index_16` ON `detalle_administrativo_cargo_administrativo` (`fk_id_administrativo`, `fk_id_cargo_administrativo`);
+CREATE UNIQUE INDEX `detalle_administrativo_cargo_administrativo_index_15` ON `detalle_administrativo_cargo_administrativo` (`fk_id_administrativo`, `fk_id_cargo_administrativo`);
 
 ALTER TABLE `institucion_educativa` ADD FOREIGN KEY (`fk_id_rector`) REFERENCES `detalle_administrativo` (`id_administrativo`);
 
@@ -342,16 +324,6 @@ ALTER TABLE `horario_clase` ADD FOREIGN KEY (`fk_id_ubicacion_clase`) REFERENCES
 ALTER TABLE `historial_academico` ADD FOREIGN KEY (`fk_id_grupo`) REFERENCES `grupo` (`id`);
 
 ALTER TABLE `historial_academico` ADD FOREIGN KEY (`fk_id_estudiante`) REFERENCES `detalle_estudiante` (`id_estudiante`);
-
-ALTER TABLE `nota_estudiante_asignatura_matriculada` ADD FOREIGN KEY (`fk_id_estudiante`) REFERENCES `detalle_estudiante` (`id_estudiante`);
-
-ALTER TABLE `nota_estudiante_asignatura_matriculada` ADD FOREIGN KEY (`fk_id_matricula_academica`) REFERENCES `matricula_academica` (`id_matricula_academica`);
-
-ALTER TABLE `nota_estudiante_asignatura_matriculada` ADD FOREIGN KEY (`fk_id_asignatura`) REFERENCES `asignatura` (`id_asignatura`);
-
-ALTER TABLE `creditos_aprobados_estudiante_programa_academico` ADD FOREIGN KEY (`fk_id_estudiante`) REFERENCES `detalle_estudiante` (`id_estudiante`);
-
-ALTER TABLE `creditos_aprobados_estudiante_programa_academico` ADD FOREIGN KEY (`fk_id_programa_academico`) REFERENCES `programa_academico` (`id_programa_academico`);
 
 ALTER TABLE `prerequisitos_asignatura` ADD FOREIGN KEY (`fk_id_asignatura`) REFERENCES `asignatura` (`id_asignatura`);
 
