@@ -1,6 +1,6 @@
-import { Request, Response } from 'express';
-import { sendResponse } from './auxiliar.functions';
-import { pool } from '../db/db';
+import { type Request, type Response } from 'express'
+import { sendResponse } from './auxiliar.functions'
+import { pool } from '../db/db'
 
 // -- Add new user
 // INSERT INTO usuarios (documento_identidad, nombre, correo_institucional, telefono, direccion, tipo_usuario, contrasena)
@@ -9,20 +9,20 @@ import { pool } from '../db/db';
 // VALUES ('Ingeniería de Sistemas');
 const addNewProgram = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { nombre_programa } = req.body;
+    const { nombrePrograma } = req.body
     const [rows] = await pool.query(
-      `INSERT INTO programa_academico (nombre) VALUES (?)`,
-      [nombre_programa]
-    );
-    console.log(rows);
+      'INSERT INTO programa_academico (nombre) VALUES (?)',
+      [nombrePrograma]
+    )
+    console.log(rows)
     sendResponse(res, 200, 'Program successfully added', null, {
       id: (rows as any).insertId,
-      nombre: nombre_programa,
-    });
+      nombre: nombrePrograma
+    })
   } catch (error) {
-    return sendResponse(res, 500, 'Failed to add program', error);
+    sendResponse(res, 500, 'Failed to add program', error)
   }
-};
+}
 // const addNewUser = async (req: Request, res: Response): Promise<void> => {
 //   try {
 //     const [rows] = await pool.query('SELECT * FROM employee');
@@ -34,17 +34,17 @@ const addNewProgram = async (req: Request, res: Response): Promise<void> => {
 // SELECT * FROM usuarios WHERE documento_identidad = '123456789' AND contrasena = 'contrasena123';
 const login = async (req: Request, res: Response): Promise<void> => {
   try {
-    const id = req.params.id;
+    const id = req.params.id
 
     const [rows] = await pool.query(
       'SELECT * FROM usuarios WHERE documento_identidad = ?',
       [id]
-    );
-    sendResponse(res, 200, 'User found', null, rows);
+    )
+    sendResponse(res, 200, 'User found', null, rows)
   } catch (error) {
-    sendResponse(res, 500, 'Not found', error);
+    sendResponse(res, 500, 'Not found', error)
   }
-};
+}
 
 // const getEmployee = async (req, res) => {
 //   try {
@@ -113,4 +113,4 @@ const login = async (req: Request, res: Response): Promise<void> => {
 //     return res.status(500).json({ message: "Something goes wrong" });
 //   }
 
-export { addNewProgram, login };
+export { addNewProgram, login }
