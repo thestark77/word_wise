@@ -11,3 +11,11 @@ export interface Iresponse {
   data?: any
   error?: any
 }
+export interface Imysql2Error {
+  message: string
+  code: string
+  errno: number
+  sql: string
+  sqlState: string
+  sqlMessage: string
+}

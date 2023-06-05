@@ -18,10 +18,11 @@ module.exports = {
     sourceType: 'module'
   },
   rules: {
-    '@typescript-eslint/no-misused-promises': 'warn',
+    '@typescript-eslint/no-misused-promises': 'warn', //'off'
     '@typescript-eslint/no-unsafe-member-access': 'warn',
     '@typescript-eslint/no-unsafe-argument': 'warn',
     '@typescript-eslint/no-unsafe-assignment': 'warn',
+    '@typescript-eslint/no-unused-vars': 'warn',
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off'
   }

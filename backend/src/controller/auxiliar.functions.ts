@@ -1,12 +1,12 @@
-import { type Request, type Response } from 'express'
+import type { Response } from 'express'
 // import { pool } from '../db/db'
-import { type Iresponse } from '../interfaces'
+import type { Iresponse, Imysql2Error } from '../interfaces'
 
 const sendResponse = (
   res: Response,
   status: number,
-  message: any,
-  error?: any,
+  message: string,
+  error?: Imysql2Error,
   data?: any
 ): void => {
   let response: Iresponse = {
@@ -41,14 +41,14 @@ const sendResponse = (
   res.status(status).json(response)
 }
 
-const saveUser = async (req: Request, res: Response): Promise<void> => {
-  res.status(200).json({ message: 'Welcome to hell' })
-  // try {
-  //   const [rows] = await pool.query('SELECT * FROM users');
-  //   sendResponse(res, 200, '__', null, rows); //TODO:
-  // } catch (error) {
-  //   sendResponse(res, 500, 'No se ha podido __', error); //TODO:
-  // }
-}
+// const saveUser = async (req: Request, res: Response): Promise<void> => {
+//   res.status(200).json({ message: 'Welcome to hell' })
+//   try {
+//     const [rows] = await pool.query('SELECT * FROM users')
+//     sendResponse(res, 200, '__', undefined, rows) // TODO:
+//   } catch (error) {
+//     sendResponse(res, 500, 'No se ha podido __', error as Imysql2Error) // TODO:
+//   }
+// }
 
-export { saveUser, sendResponse }
+export { sendResponse }
