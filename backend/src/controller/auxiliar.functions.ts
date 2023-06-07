@@ -1,6 +1,6 @@
 import type { Response } from 'express'
 // import { pool } from '../db/db'
-import type { Iresponse, Imysql2Error } from '../interfaces'
+import type { Imysql2Error, Iresponse } from '../interfaces'
 
 const sendResponse = (
   res: Response,
