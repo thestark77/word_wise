@@ -1,35 +1,9 @@
------------------------------------------------------ TRIGGERS -----------------------------------------------------
-//! PENDIENTE
--- 1. validar que un estudiante no pueda matricular una asignatura que ya aprobó en la tabla nota_estudiante_asignatura_matriculada
-DELIMITER $$
-CREATE TRIGGER validar_asignatura_abrobada
-BEFORE INSERT ON nota_estudiante_asignatura_matriculada
-FOR EACH ROW
-BEGIN
-  DECLARE nota_existente FLOAT;
-  -- Obtener la nota final de la asignatura para el estudiante actual
-  SELECT nota_final_estudiante_asignatura INTO nota_existente
-  FROM nota_estudiante_asignatura_matriculada
-  WHERE fk_id_matricula_academica = NEW.fk_id_matricula_academica
-    AND fk_id_asignatura = NEW.fk_id_asignatura
-    AND nota_final_estudiante_asignatura >= 3.0
-  LIMIT 1;
-  -- Verificar si el estudiante ya ha aprobado la asignatura
-  IF nota_existente IS NOT NULL THEN
-    SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'El estudiante ya ha aprobado la asignatura';
-  END IF;
-END$$
-DELIMITER ; 
-
------------------------------------------------------ CONSULTAS -----------------------------------------------------
-
------------------------------------------------- REVISADAS Y PROBADAS ------------------------------------------------
-
-
-
 ----------------------------------------------------- PENDIENTES -----------------------------------------------------
---0. Eliminar tabla curso y pasar sus datos a la tabla grupo
+--TODO:
+--0. Eliminar tabla curso y pasar sus datos a la tabla grupo, CONSIDERA la posibilidad de eliminar la tabla matricula_academica en favor de historial_academico pero NO LO CREO
+--0.1. eliminar la tala nota_estudiante_asignatura_matriculada em favor de asignaturas_aprobadas_estudiante_programa_academico, ahora la nota definitiva estará asociada a un estudiante, programa académico y asignatura y la nota de un grupo se calculará en ejecución con la tabla historial_academico
+--0.2. validar que un estudiante no pueda matricular una asignatura que ya aprobó en la tabla asignaturas_aprobadas_estudiante_programa_academico
+--//! cuando inserte muchos registros simultáneamente, como cuando calcule las notas de los estudiantes, no se podrán insertar datos duplicados en la tabla asignaturas_aprobadas_estudiante_programa_academico, por lo tanto la consulta fallará. Necesito que continúe ejecutándose y al final me notifique los registros que fallaron al insertarse
 --1. Módulo de notas detallado y personalizable en cuanto a porcentajes
 --2. Consulta que retorne el promedio de un estudiante en un programa academico en un periodo académico
 --3. Consulta que retorne el promedio global de un estudiante en un programa academico
@@ -43,7 +17,7 @@ DELIMITER ;
 --11. Estandarizar la nomenclatura de los id en varias tablas, como curso y grupo, que solo dice "id", cambiar por id_grupo e id_curso
 
 
------------------------------------------- REQUERIMIENTOS DE BASE DE DATOS ------------------------------------------
+----------------------------------------------------- CONSULTAS -----------------------------------------------------
 
 /*//! Landing page
 //*Lista de programas académicos, malla curricular de cada programa, asignaturas, cursos de extensión y detalles de cada uno, lista de profesores con sus fotos de perfil:
@@ -301,7 +275,7 @@ SELECT id_anio_periodo_academico
 );
 
 //* 3. Historial del estudiante en TODA su historia(id_estudiante)
-//!Ojalá lo alcazáramos a implementar :v
+//! Es mejor dejarlo para post entrega :v
 SELECT
   historial_academico.fk_id_grupo,
   grupo.numero_grupo,
@@ -320,7 +294,6 @@ JOIN oferta_academica ON curso.fk_id_oferta_academica = oferta_academica.id_ofer
 WHERE historial_academico.fk_id_estudiante = 123;
 
 //* 5. Obtener la matrícula académica de un estudiante(id_estudiante, id_oferta_academica)
-//! Por alguna mística razón, esta consulta retorna una fila NULL al final...
 SELECT id_matricula_academica
 FROM matricula_academica
 WHERE fk_id_estudiante = 123 AND fk_id_oferta_academica = 1;
@@ -357,8 +330,8 @@ WHERE m.fk_id_estudiante = 123
     WHERE anio = 2023 AND fk_id_periodo_academico = 1
   );
 
-//* 10. Ubicación semestral de un estudiante en un programa académico(id_estudiante, id_programa_academico)
-
+//? 10. Ubicación semestral de un estudiante en un programa académico(id_estudiante, id_programa_academico)
+//!cambiar por asignaturas_aprobadas_estudiante_programa_academico
 SELECT ROUND(c.total_creditos_aprobados / p.total_creditos, 2) AS ratio_creditos
 FROM creditos_aprobados_estudiante_programa_academico AS c
 INNER JOIN programa_academico AS p ON c.fk_id_programa_academico = p.id_programa_academico
@@ -373,68 +346,33 @@ WHERE ma.fk_id_estudiante = 123
 ORDER BY ap.anio DESC, ap.fk_id_periodo_academico DESC
 LIMIT 1;
 
-//? 12. registro nota final estudiante(id_estudiante, anio, id_anio_periodo_academico)
--- Calcular el promedio
+//* 12. Registro nota final estudiante en un grupo(id_estudiante, id_grupo)
+TODO: Esta función se va a eliminar en favor de la 13+1
 INSERT INTO nota_estudiante_asignatura_matriculada (fk_id_matricula_academica, fk_id_asignatura, nota_final_estudiante_asignatura)
-SELECT ma.id_matricula_academica, curso.fk_id_asignatura, AVG((nota_1 + nota_2 + nota_3 + nota_4) / 4) AS promedio
-
-SELECT AVG((nota_1 + nota_2 + nota_3 + nota_4) / 4) AS promedio
+SELECT ma.id_matricula_academica, curso.fk_id_asignatura, ((ha.nota_1 + ha.nota_2 + ha.nota_3 + ha.nota_4) / 4) AS promedio
 FROM historial_academico ha
 INNER JOIN grupo ON ha.fk_id_grupo = grupo.id
 INNER JOIN curso ON grupo.fk_id_curso = curso.id
-INNER JOIN oferta_academica oa ON curso.fk_id_oferta_academica = oa.id_oferta_academica
-INNER JOIN anio_periodo_academico apa ON oa.fk_id_anio_periodo_academico = apa.id_anio_periodo_academico
 INNER JOIN matricula_academica ma ON ha.fk_id_estudiante = ma.fk_id_estudiante
-WHERE ha.fk_id_estudiante = 123
-AND apa.anio = 2023 
-AND apa.fk_id_periodo_academico = 1
-AND ma.id_matricula_academica = (
-  SELECT id_matricula_academica
-  FROM matricula_academica
-  WHERE fk_id_oferta_academica = curso.fk_id_oferta_academica
-  AND fk_id_estudiante = ha.fk_id_estudiante
-);
+WHERE ha.id in (
+  SELECT id
+  FROM historial_academico
+  WHERE ha.fk_id_estudiante = 123
+  AND ha.fk_id_grupo = 1
+)
+ON DUPLICATE KEY UPDATE nota_final_estudiante_asignatura = (ha.nota_1 + ha.nota_2 + ha.nota_3 + ha.nota_4) / 4;
 
--- Insertar el promedio en la tabla2
-INSERT INTO nota_estudiante_asignatura_matriculada (fk_id_matricula_academica, fk_id_asignatura, nota_final_estudiante_asignatura)
-VALUES
-()
-
--- Insertar el promedio en la tabla3 si es mayor o igual a 3.0
-INSERT INTO tabla3 (promedio)
-SELECT AVG((columna1 + columna2 + columna3 + columna4) / 4)
-FROM tabla1
-WHERE AVG((columna1 + columna2 + columna3 + columna4) / 4) >= 3.0;
-INSERT INTO tabla3 (promedio)
-SELECT AVG((columna1 + columna2 + columna3 + columna4) / 4)
-FROM tabla1
-WHERE AVG((columna1 + columna2 + columna3 + columna4) / 4)>=3.0;
-
-
-//!second try (id_estudiante, oferta_academica)
-
-INSERT INTO nota_estudiante_asignatura_matriculada (fk_id_matricula_academica, fk_id_asignatura, nota_final_estudiante_asignatura)
-SELECT ma.id_matricula_academica, curso.fk_id_asignatura, AVG((ha.nota_1 + ha.nota_2 + ha.nota_3 + ha.nota_4) / 4) AS promedio
-FROM historial_academico ha
-INNER JOIN grupo ON ha.fk_id_grupo = grupo.id
-INNER JOIN curso ON grupo.fk_id_curso = curso.id
-INNER JOIN oferta_academica oa ON curso.fk_id_oferta_academica = oa.id_oferta_academica
-INNER JOIN matricula_academica ma ON oa.id_oferta_academica = ma.fk_id_oferta_academica
-WHERE ha.fk_id_grupo = 2
-  AND ma.fk_id_oferta_academica = 6
-GROUP BY ma.id_matricula_academica, curso.fk_id_asignatura;
-
-INSERT INTO creditos_aprobados_estudiante_programa_academico (fk_id_estudiante, fk_id_programa_academico, total_creditos_aprobados)
-SELECT ma.fk_id_estudiante, oa.fk_id_programa_academico, AVG((ha.nota_1 + ha.nota_2 + ha.nota_3 + ha.nota_4) / 4) AS promedio
-FROM historial_academico ha
-INNER JOIN grupo ON ha.fk_id_grupo = grupo.id
-INNER JOIN curso ON grupo.fk_id_curso = curso.id
-INNER JOIN oferta_academica oa ON curso.fk_id_oferta_academica = oa.id_oferta_academica
-INNER JOIN anio_periodo_academico apa ON oa.fk_id_anio_periodo_academico = apa.id_anio_periodo_academico
-INNER JOIN matricula_academica ma ON apa.id_anio_periodo_academico = ma.fk_id_anio_periodo_academico
-WHERE ha.fk_id_estudiante = 123
-  AND apa.anio = 2023
-  AND apa.fk_id_periodo_academico = 1
-GROUP BY ma.fk_id_estudiante, oa.fk_id_programa_academico
-HAVING promedio >= 3.0;
+//* 13. Registrar como aprobada una asignatura por un estudiante si su nota en el grupo es >= 3(id_estudiante, id_grupo)
+INSERT INTO asignaturas_aprobadas_estudiante_programa_academico (fk_id_estudiante, fk_id_programa_academico, fk_id_asignatura, nota_final_estudiante_asignatura)
+SELECT id_estudiante, id_programa_academico, id_asignatura, nota_asignatura
+FROM (
+  SELECT ha.fk_id_estudiante AS id_estudiante, oa.fk_id_programa_academico AS id_programa_academico, curso.fk_id_asignatura AS id_asignatura, ROUND((ha.nota_1 + ha.nota_2 + ha.nota_3 + ha.nota_4) / 4, 1) AS nota_asignatura
+  FROM historial_academico ha
+  INNER JOIN grupo ON ha.fk_id_grupo = grupo.id
+  INNER JOIN curso ON grupo.fk_id_curso = curso.id
+  INNER JOIN oferta_academica oa ON curso.fk_id_oferta_academica = oa.id_oferta_academica
+  WHERE ha.fk_id_estudiante = 123
+    AND ha.fk_id_grupo = 1
+) AS subquery
+HAVING nota_asignatura >= 3;
 */
