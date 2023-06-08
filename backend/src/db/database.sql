@@ -330,12 +330,17 @@ WHERE m.fk_id_estudiante = 123
     WHERE anio = 2023 AND fk_id_periodo_academico = 1
   );
 
-//? 10. Ubicación semestral de un estudiante en un programa académico(id_estudiante, id_programa_academico)
-//!cambiar por asignaturas_aprobadas_estudiante_programa_academico
-SELECT ROUND(c.total_creditos_aprobados / p.total_creditos, 2) AS ratio_creditos
-FROM creditos_aprobados_estudiante_programa_academico AS c
-INNER JOIN programa_academico AS p ON c.fk_id_programa_academico = p.id_programa_academico
-WHERE c.fk_id_estudiante = 123 AND c.fk_id_programa_academico = 1;
+//* 10. Ubicación semestral de un estudiante en un programa académico(id_estudiante, id_oferta_academica)
+SELECT subquery.creditos_aprobados, subquery.creditos_totales, ROUND(subquery.creditos_aprobados/subquery.creditos_totales * 100, 2) AS ratio_aprobado
+FROM (
+  SELECT SUM(asignatura.num_creditos) AS creditos_aprobados, pa.total_creditos AS creditos_totales
+  FROM asignaturas_aprobadas_estudiante_programa_academico AS aaepa
+  INNER JOIN asignatura ON aaepa.fk_id_asignatura = asignatura.id_asignatura
+  INNER JOIN oferta_academica oa ON aaepa.fk_id_oferta_academica = oa.id_oferta_academica
+  INNER JOIN programa_academico pa ON oa.fk_id_programa_academico = pa.id_programa_academico
+  WHERE aaepa.fk_id_estudiante = 123 
+  AND aaepa.fk_id_oferta_academica = 1
+) subquery;
 
 //* 11. Último periodo académico que matriculó un estudiante(id_estudiante)
 SELECT ap.anio, ap.fk_id_periodo_academico AS periodo_academico
@@ -363,10 +368,10 @@ WHERE ha.id in (
 ON DUPLICATE KEY UPDATE nota_final_estudiante_asignatura = (ha.nota_1 + ha.nota_2 + ha.nota_3 + ha.nota_4) / 4;
 
 //* 13. Registrar como aprobada una asignatura por un estudiante si su nota en el grupo es >= 3(id_estudiante, id_grupo)
-INSERT INTO asignaturas_aprobadas_estudiante_programa_academico (fk_id_estudiante, fk_id_programa_academico, fk_id_asignatura, nota_final_estudiante_asignatura)
-SELECT id_estudiante, id_programa_academico, id_asignatura, nota_asignatura
+INSERT INTO asignaturas_aprobadas_estudiante_programa_academico (fk_id_estudiante, fk_id_oferta_academica, fk_id_asignatura, nota_final_estudiante_asignatura)
+SELECT id_estudiante, id_oferta_academica, id_asignatura, nota_asignatura
 FROM (
-  SELECT ha.fk_id_estudiante AS id_estudiante, oa.fk_id_programa_academico AS id_programa_academico, curso.fk_id_asignatura AS id_asignatura, ROUND((ha.nota_1 + ha.nota_2 + ha.nota_3 + ha.nota_4) / 4, 1) AS nota_asignatura
+  SELECT ha.fk_id_estudiante AS id_estudiante, oa.id_oferta_academica AS id_oferta_academica, curso.fk_id_asignatura AS id_asignatura, ROUND((ha.nota_1 + ha.nota_2 + ha.nota_3 + ha.nota_4) / 4, 1) AS nota_asignatura
   FROM historial_academico ha
   INNER JOIN grupo ON ha.fk_id_grupo = grupo.id
   INNER JOIN curso ON grupo.fk_id_curso = curso.id
@@ -375,4 +380,14 @@ FROM (
     AND ha.fk_id_grupo = 1
 ) AS subquery
 HAVING nota_asignatura >= 3;
+
+//* 14. Promedio de un estudiante en una oferta academica(id_estudiante, id_oferta_academica) tabla historial_academico
+//! Hay que probarlo con más datos cuando los estudiantes tengan más notas
+SELECT AVG(ROUND((ha.nota_1 + ha.nota_2 + ha.nota_3 + ha.nota_4) / 4, 1)) AS promedio_semestral
+  FROM historial_academico ha
+  INNER JOIN grupo ON ha.fk_id_grupo = grupo.id
+  INNER JOIN curso ON grupo.fk_id_curso = curso.id
+  INNER JOIN oferta_academica oa ON curso.fk_id_oferta_academica = oa.id_oferta_academica
+  WHERE ha.fk_id_estudiante = 123
+  AND curso.fk_id_oferta_academica = 1;
 */

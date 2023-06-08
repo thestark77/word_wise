@@ -209,7 +209,7 @@ CREATE TABLE `nota_estudiante_asignatura_matriculada` (
 CREATE TABLE `asignaturas_aprobadas_estudiante_programa_academico` (
   `id` int PRIMARY KEY AUTO_INCREMENT,
   `fk_id_estudiante` int NOT NULL,
-  `fk_id_programa_academico` int NOT NULL,
+  `fk_id_oferta_academica` int NOT NULL,
   `fk_id_asignatura` int NOT NULL,
   `nota_final_estudiante_asignatura` float NOT NULL
 );
@@ -274,7 +274,7 @@ CREATE UNIQUE INDEX `historial_academico_index_9` ON `historial_academico` (`fk_
 
 CREATE UNIQUE INDEX `nota_estudiante_asignatura_matriculada_index_10` ON `nota_estudiante_asignatura_matriculada` (`fk_id_matricula_academica`, `fk_id_asignatura`);
 
-CREATE UNIQUE INDEX `asignaturas_aprobadas_estudiante_programa_academico_index_11` ON `asignaturas_aprobadas_estudiante_programa_academico` (`fk_id_estudiante`, `fk_id_programa_academico`, `fk_id_asignatura`);
+CREATE UNIQUE INDEX `asignaturas_aprobadas_estudiante_programa_academico_index_11` ON `asignaturas_aprobadas_estudiante_programa_academico` (`fk_id_estudiante`, `fk_id_oferta_academica`, `fk_id_asignatura`);
 
 CREATE UNIQUE INDEX `prerequisitos_asignatura_index_12` ON `prerequisitos_asignatura` (`fk_id_asignatura`, `fk_id_asignatura_prerequisito`);
 
@@ -364,7 +364,7 @@ ALTER TABLE `nota_estudiante_asignatura_matriculada` ADD FOREIGN KEY (`fk_id_asi
 
 ALTER TABLE `asignaturas_aprobadas_estudiante_programa_academico` ADD FOREIGN KEY (`fk_id_estudiante`) REFERENCES `detalle_estudiante` (`id_estudiante`);
 
-ALTER TABLE `asignaturas_aprobadas_estudiante_programa_academico` ADD FOREIGN KEY (`fk_id_programa_academico`) REFERENCES `programa_academico` (`id_programa_academico`);
+ALTER TABLE `asignaturas_aprobadas_estudiante_programa_academico` ADD FOREIGN KEY (`fk_id_oferta_academica`) REFERENCES `oferta_academica` (`id_oferta_academica`);
 
 ALTER TABLE `asignaturas_aprobadas_estudiante_programa_academico` ADD FOREIGN KEY (`fk_id_asignatura`) REFERENCES `asignatura` (`id_asignatura`);
 
@@ -1377,7 +1377,7 @@ INSERT INTO `nota_estudiante_asignatura_matriculada` (`fk_id_matricula_academica
 -- Volcado de datos para la tabla `id_asignatura`
 --
 
-INSERT INTO `asignaturas_aprobadas_estudiante_programa_academico` (`fk_id_estudiante`, `fk_id_programa_academico`, `fk_id_asignatura`, `nota_final_estudiante_asignatura`) VALUES
+INSERT INTO `asignaturas_aprobadas_estudiante_programa_academico` (`fk_id_estudiante`, `fk_id_oferta_academica`, `fk_id_asignatura`, `nota_final_estudiante_asignatura`) VALUES
 (790, 1, 11, 2.9),
 (791, 1, 12, 3.0),
 (792, 1, 13, 4.5);
