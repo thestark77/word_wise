@@ -394,14 +394,12 @@ ALTER TABLE `detalle_administrativo_cargo_administrativo` ADD FOREIGN KEY (`fk_i
 
 
 --
---
 -- Volcado de datos para la tabla `sexo`
 --
 
 INSERT INTO `sexo` (`nombre_sexo`) VALUES
 ('Masculino'),
 ('Femenino');
-
 
 --
 -- Volcado de datos para la tabla `usuario`

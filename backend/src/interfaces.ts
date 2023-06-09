@@ -4,11 +4,11 @@ export interface controller {
   getUsers?: (req: Request, res: Response) => void
 }
 
-export interface Iresponse {
-  success: boolean
-  status?: number
-  message?: any
-  data?: any
+export interface Irespuesta {
+  exito?: boolean
+  estado?: number
+  mensaje?: any
+  datos?: any
   error?: any
 }
 export interface Imysql2Error {
@@ -19,3 +19,19 @@ export interface Imysql2Error {
   sqlState: string
   sqlMessage: string
 }
+
+export interface IParametrosenviarRespuesta {
+  res: Response
+  estado: number
+  mensaje: string
+  datos?: any
+  error?: Imysql2Error
+}
+
+export interface IinsertarNombreTablaEnConsultaParametros {
+  modulo: number
+  numeroConsulta: number
+  parametros?: number[] | string[]
+}
+
+export type Iconsultas = Record<number, Record<number, string>>

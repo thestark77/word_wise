@@ -1,12 +1,17 @@
 import express from 'express'
 // import express, { type Request, type Response } from 'express'
 // import { saveUser } from '../controller/auxiliar.functions';
-import { addNewProgram } from '../controller/controller'
+import {
+  listaAsignaturasProgramaAcademico,
+  listaProgramasAcademicos
+} from '../controller/controller'
 const Router = express.Router()
 
-Router.route('/newprogram').post(addNewProgram)
+Router.route('/programas_academicos/').get(listaProgramasAcademicos)
 
-Router.route('/almacenes/crearCuadre/:nombreAlmacen').post()
+Router.route('/asignaturas_programa_academico/:id_programa_academico').get(
+  listaAsignaturasProgramaAcademico
+)
 
 Router.route('/almacenes/:nombreAlmacen').post().put()
 

@@ -22,10 +22,11 @@
 /*//! Landing page
 //*Lista de programas académicos, malla curricular de cada programa, asignaturas, cursos de extensión y detalles de cada uno, lista de profesores con sus fotos de perfil:
 //* 1. Lista de programas académicos() => TODO de tabla programa_academico
-//*Funciona
+//?Lista en el backend
 SELECT * FROM programa_academico;
 
-//* 2. Malla curricular de cada programa(id_programa_academico) => todos los id_asignatura de tabla pensum_programa_academico+
+//* 2. Malla curricular de cada programa(id_programa_academico) => todos los id_asignatura de tabla pensum_programa_academico
+//?Lista en el backend
 SELECT asignatura.*
 FROM pensum_programa_academico ppa
 INNER JOIN programa_academico ON ppa.fk_id_programa_academico = programa_academico.id_programa_academico
@@ -134,7 +135,7 @@ WHERE id_docente = 3;
 
 //*2.3. Eliminación de roles de usuarios en la tabla asignacion_roles(id_usuario, id_rol)
 DELETE FROM asignacion_roles
-WHERE fk_id_usuario = 1 AND fk_id_rol = 1;
+WHERE fk_id_usuario = [1] AND fk_id_rol = [2];
 
 //* 3. Cambiar contraseña usuario (id_usuario, nueva_contrasena_salt, nueva_contrasena_hash)
 UPDATE usuario
@@ -150,7 +151,7 @@ INNER JOIN anio_periodo_academico AS ap ON oa.fk_id_anio_periodo_academico = ap.
 WHERE oa.fk_id_anio_periodo_academico = (
 SELECT id_anio_periodo_academico
 FROM anio_periodo_academico
-WHERE anio = 2023 AND fk_id_periodo_academico = 1
+WHERE anio = [1] AND fk_id_periodo_academico = [2]
 );
 
 //* 5. Total de estudiantes matriculados en un periodo académico en un programa académico(anio, id_periodo_academico, id_programa_academico)
@@ -381,7 +382,7 @@ FROM (
 ) AS subquery
 HAVING nota_asignatura >= 3;
 
-//* 14. Promedio de un estudiante en una oferta academica(id_estudiante, id_oferta_academica) tabla historial_academico
+//* 14. Promedio de un estudiante en una oferta academica(id_estudiante, id_oferta_academica)
 //! Hay que probarlo con más datos cuando los estudiantes tengan más notas
 SELECT AVG(ROUND((ha.nota_1 + ha.nota_2 + ha.nota_3 + ha.nota_4) / 4, 1)) AS promedio_semestral
   FROM historial_academico ha

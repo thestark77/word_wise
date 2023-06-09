@@ -1,24 +1,21 @@
-import express from 'express'
-import {
-  type Application,
-  type Request,
-  type Response,
-  type NextFunction
-} from 'express'
-import path from 'path'
 import cookieParser from 'cookie-parser'
-import logger from 'morgan'
 import cors from 'cors'
+import express, {
+  type Application,
+  type NextFunction,
+  type Request,
+  type Response
+} from 'express'
+import logger from 'morgan'
+import path from 'path'
 
-import { Router } from './routes/index.router'
 import { NODE_ENV, PORT } from './config/config'
-import { sendResponse } from './controller/auxiliar.functions'
+import { enviarRespuesta } from './controller/auxiliar.functions'
+import { Router } from './routes/index.router'
 
 const app: Application = express()
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'pug')
 
 // Middleware
 app.use(cors())
@@ -33,7 +30,7 @@ app.use('/api', Router)
 
 // catch 404 and forward to error handler
 app.use((req: Request, res: Response, next: NextFunction) => {
-  sendResponse(res, 404, 'Error, ruta no encontrada')
+  enviarRespuesta({ res, estado: 404, mensaje: 'Error, ruta no encontrada' })
 })
 
 // error handler
@@ -44,7 +41,6 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 
   // render the error page
   res.status(err.status ?? 500)
-  res.render('error')
 })
 
 app.listen(PORT)
