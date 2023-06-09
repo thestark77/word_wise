@@ -1,14 +1,16 @@
-import { type Request, type Response } from 'express'
+/* eslint-disable @typescript-eslint/indent */
+import type { Response } from 'express'
+import type { RowDataPacket } from 'mysql2'
 
-export interface controller {
-  getUsers?: (req: Request, res: Response) => void
+export interface MiError extends Error {
+  status?: number
 }
 
-export interface Irespuesta {
-  exito?: boolean
-  estado?: number
+export interface IrespuestaBackend {
+  exito: boolean
+  estado: number
   mensaje?: any
-  datos?: any
+  respuestaDB?: IrespuestaDB
   error?: any
 }
 export interface Imysql2Error {
@@ -21,17 +23,41 @@ export interface Imysql2Error {
 }
 
 export interface IParametrosenviarRespuesta {
+  fallo?: boolean
   res: Response
-  estado: number
   mensaje: string
-  datos?: any
-  error?: Imysql2Error
+  respuestaDB?: IrespuestaDB
 }
 
 export interface IinsertarNombreTablaEnConsultaParametros {
   modulo: number
   numeroConsulta: number
-  parametros?: number[] | string[]
+}
+export interface IconsultarDB {
+  consulta: string
+  arregloParametros?: number[] | string[]
 }
 
-export type Iconsultas = Record<number, Record<number, string>>
+export interface IrespuestaDB {
+  exito: boolean
+  cantidadResultados?: number
+  datos: RowDataPacket[]
+  error?: Imysql2Error
+}
+export const metodos = {
+  get: 'get',
+  post: 'post',
+  put: 'put',
+  delete: 'delete'
+}
+// export interface Iconsulta {}
+export type Iconsultas = Record<
+  number,
+  {
+    ruta: string
+    metodo?: string // TODO: remove ?
+    consulta: string
+    parametros: string[]
+  }
+>
+export type Iconsultas2 = Record<number, Record<number, string>>

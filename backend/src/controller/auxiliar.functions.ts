@@ -1,32 +1,45 @@
 // import { pool } from '../db/db'
-import type { IParametrosenviarRespuesta, Irespuesta } from '../interfaces'
+import type {
+  IParametrosenviarRespuesta,
+  IrespuestaBackend
+} from '../interfaces'
 
 const enviarRespuesta = ({
   res,
-  estado,
   mensaje,
-  datos,
-  error
+  respuestaDB,
+  fallo
 }: IParametrosenviarRespuesta): void => {
-  let respuesta: Irespuesta = {}
+  let respuestaBackend: IrespuestaBackend = {
+    exito: false,
+    estado: 404
+  }
 
-  if (estado === 200) {
-    respuesta = {
-      exito: true,
-      datos,
-      estado,
-      mensaje
+  if (fallo === undefined && respuestaDB !== undefined) {
+    if (respuestaDB.exito) {
+      respuestaBackend = {
+        exito: true,
+        estado: 200,
+        respuestaDB,
+        mensaje
+      }
+    } else {
+      respuestaBackend = {
+        exito: false,
+        estado: 500,
+        mensaje,
+        error: respuestaDB.error
+      }
     }
-  } else if (estado === 404 || estado === 500) {
-    respuesta = {
+  } else {
+    respuestaBackend = {
       exito: false,
-      estado,
-      mensaje,
-      error
+      estado: 404,
+      mensaje
     }
   }
 
-  res.status(estado).json(respuesta)
+  res.status(respuestaBackend.estado).json(respuestaBackend)
 }
 
 export { enviarRespuesta }
