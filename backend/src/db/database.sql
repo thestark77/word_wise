@@ -43,18 +43,13 @@ SELECT *
 FROM asignatura
 WHERE curso_extension = true
 
-//* 4. Lista de profesores + detalle(id_usuario) => todos los id_usuario de tabla asignacion_roles where rol == 2 => lista docentes
-SELECT usuario.*, detalle_estudiante.*
-FROM usuario, detalle_estudiante
-WHERE usuario.id_usuario = <id_usuario> AND detalle_estudiante.id_estudiante = <id_usuario>;
-
-SELECT usuario.*, detalle_docente.*
-FROM usuario, detalle_docente
-WHERE usuario.id_usuario = <id_usuario> AND detalle_docente.id_docente = <id_usuario>;
-
-SELECT usuario.*, detalle_administrativo.*
-FROM usuario, detalle_administrativo
-WHERE usuario.id_usuario = <id_usuario> AND detalle_administrativo.id_administrativo = <id_usuario>;
+//* 4. Obtener datos de un usuario según su rol
+SELECT id_usuario, sexo, nombres, apellidos, correo_electronico, telefono, url_foto, e.*, d.id_docente, d.fk_id_departamento, d.fk_id_tipo_contrato
+FROM usuario u
+LEFT JOIN detalle_estudiante e ON u.id_usuario = e.id_estudiante
+LEFT JOIN detalle_docente d ON u.id_usuario = d.id_docente
+LEFT JOIN detalle_administrativo a ON u.id_usuario = a.id_administrativo
+WHERE u.id_usuario = ?;
 
 //* 5. Lista de profesores con su nombre, apellido, departamento y foto de perfil(lista )
 SELECT usuario.id_usuario, usuario.nombres, usuario.apellidos, usuario.url_foto, detalle_docente.fk_id_departamento
@@ -392,3 +387,53 @@ SELECT AVG(ROUND((ha.nota_1 + ha.nota_2 + ha.nota_3 + ha.nota_4) / 4, 1)) AS pro
   WHERE ha.fk_id_estudiante = 123
   AND curso.fk_id_oferta_academica = 1;
 */
+
+
+/*//! Landing page
+//* 1. Lista de programas académicos() => TODO de tabla programa_academico
+//?Lista en el backend
+//* 2. Malla curricular de cada programa(id_programa_academico) => todos los id_asignatura de tabla pensum_programa_academico
+//* 3. Asignaturas cursos de extensión + detalle() => TODO de tabla asignatura where asigatura.curso_extension == true
+//* 4. Obtener datos de un usuario según su rol
+//* 5. Lista de profesores con su nombre, apellido, departamento y foto de perfil(lista )
+//! LOGIN
+//* 1. Login(id_usuario, id_rol)
+//*CREATE y UPDATE tablas: (id) => CREATE o UPDATE en tabla: usuario, asignatura, prerequisitos_asignatura, curso, grupo, horario_clase, docente_asignatura, matricula_academica
+//* 1.1. Crea usuario
+//* 1.2. Crea dirección
+//* 1.3. Asigna roles al usuario
+/
+/*1.4. Crear detalle_estudiante
+//*1.5. Crear detalle_docente
+//*1.6. Crear detalle_administrativo
+//*1.7. Asignar cargos administrativos
+//? 2. UPDATES
+//*2.1. Actualizar tabla usuario
+//*2.1. Actualizar tabla detalle_estudiante
+//*2.2. Actualizar tabla detalle_docente
+//*2.3. Eliminación de roles de usuarios en la tabla asignacion_roles(id_usuario, id_rol)
+//* 3. Cambiar contraseña usuario (id_usuario, nueva_contrasena_salt, nueva_contrasena_hash)
+//* 4. Total de estudiantes matriculados en un periodo académico en TODA la institución educativa(anio, id_periodo_academico)
+//* 5. Total de estudiantes matriculados en un periodo académico en un programa académico(anio, id_periodo_academico, id_programa_academico)
+//! PORTAL DOCENTE
+//* 1. Obtener información de un docente
+//* 2. Ver las asignaturas que enseña un docente(id_docente)
+//* 3. Ver horario de un docente(id_docente, anio, id_periodo_academic
+//* 3.2. Lista de grupos en los que enseña un docente en un periodo académico(id_docente, anio, id_periodo_academico)
+//* 4. Cambiar contraseña usuario (id_usuario, nueva_contrasena_salt, nueva_contrasena_hash)
+//* 5. Modificar notas(id_estudiante, id_grupo, nota1, nota2, nota3, nota4) => UPDATE en tabla historial_academico * notas
+//! PORTAL ESTUDIANTIL
+//* 1. SELECT id_anio_periodo_academico() (lo saca de la tabla institucion_educativa)
+//* 2. Lista de ofertas académicas de un estudiante(id_estudiante, anio, id_periodo_academico)
+//* 3. Historial del estudiante en todos sus grupos de una anio y id_periodo_academico(id_estudiante, anio, id_periodo_academico)
+//* 3. Historial del estudiante en TODA su historia(id_estudiante)
+//* 5. Obtener la matrícula académica de un estudiante(id_estudiante, id_oferta_academica)
+//* 6. Historial de notas del semestre(id_estudiante, id_oferta_academica)
+//* 7. Obtener información de un estudiante
+//* 8. Cambiar contraseña usuario (id_usuario, nueva_contrasena_salt, nueva_contrasena_hash)
+//* 9. Créditos matriculados por un estudiante en un periodo académico y en un programa académico(d_estudiante, id_programa_academico, anio, id_periodo_tiempo)
+//* 10. Ubicación semestral de un estudiante en un programa académico(id_estudiante, id_oferta_academica)
+//* 11. Último periodo académico que matriculó un estudiante(id_estudiante)
+//* 12. Registro nota final estudiante en un grupo(id_estudiante, id_grupo)
+//* 13. Registrar como aprobada una asignatura por un estudiante si su nota en el grupo es >= 3(id_estudiante, id_grupo)
+//* 14. Promedio de un estudiante en una oferta academica(id_estudiante, id_oferta_academica)

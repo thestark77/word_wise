@@ -1,79 +1,105 @@
 import {
   metodos,
+  type IconsultaRespuesta,
   type Iconsultas,
-  type IinsertarNombreTablaEnConsultaParametros
+  type IobtenerRuta,
+  type IparametroNumeroConsulta
 } from '../interfaces'
 
-export const obtenerConsulta = ({
+const obtenerConsulta = ({
   numeroConsulta
-}: IinsertarNombreTablaEnConsultaParametros): string =>
-  consultas[numeroConsulta].consulta
+}: IparametroNumeroConsulta): IconsultaRespuesta => {
+  const consultaRespuesta: IconsultaRespuesta = {
+    consulta: consultas[Number(numeroConsulta)].consulta,
+    descripcion: consultas[Number(numeroConsulta)].descripcion ?? ''
+  }
+
+  return consultaRespuesta
+}
+
+//! Esta función va para el Frontend
+const obtenerRuta = ({
+  numeroConsulta,
+  arregloParametros
+}: IobtenerRuta): string => {
+  // rutaLectura = http://localhost:3000/api/lectura | ?numeroConsulta=1&parametro2=222&parametro1=1&parametro3=333
+  // rutaEscritura = http://localhost:3000/api/escritura | ?numeroConsulta=1&parametro2=222&parametro1=1&parametro3=333
+  let ruta = `?numeroConsulta=${numeroConsulta}`
+  arregloParametros.forEach((parametro, indice) => {
+    ruta += `&parametro${indice + 1}=${parametro}`
+  })
+
+  return ruta
+}
+
+export { obtenerConsulta, obtenerRuta }
 
 const consultas: Iconsultas = {
-  // 1. Módulo de inicio
-  //? 1. Lista de programas académicos() => TODO de tabla programa_academico
+  //? 1. Módulo de inicio
   1: {
-    ruta: '/programas_academicos/',
     metodo: metodos.get,
     parametros: [],
-    consulta: 'SELECT * FROM programa_academico;'
+    consulta: 'SELECT * FROM programa_academico;',
+    descripcion: 'Lista de programas académicos'
   },
-  //? 2. Malla curricular de cada programa(id_programa_academico) => todos los id_asignatura de tabla pensum_programa_academico
+
   2: {
-    ruta: '/asignaturas_programa_academico/:idProgramaAcademico/',
     metodo: metodos.get,
     parametros: ['idProgramaAcademico'],
     consulta: `SELECT asignatura.*
         FROM pensum_programa_academico ppa
         INNER JOIN programa_academico ON ppa.fk_id_programa_academico = programa_academico.id_programa_academico
         INNER JOIN asignatura ON ppa.fk_id_asignatura = asignatura.id_asignatura
-        WHERE ppa.fk_id_programa_academico = ?`
+        WHERE ppa.fk_id_programa_academico = ?`,
+    descripcion: 'Todas las asignaturas de un programa académico'
   },
-  //? 3. Asignaturas y cursos de extensión + detalle() => TODO de tabla asignatura
+
   3: {
-    ruta: '/asignaturas_y_cursos/',
-    // metodo: metodos.,
+    metodo: metodos.get,
     parametros: [],
-    consulta: 'SELECT * FROM asignatura'
+    consulta: 'SELECT * FROM asignatura',
+    descripcion: 'Todas las asignaturas y cursos de extensión'
   },
-  //? 4. Lista de profesores con su nombre, apellido, departamento y foto de perfil(lista )
+
   4: {
-    ruta: '',
-    // metodo: metodos.,
+    metodo: metodos.get,
     parametros: [],
     consulta: `SELECT usuario.id_usuario, usuario.nombres, usuario.apellidos, usuario.url_foto, detalle_docente.fk_id_departamento
     FROM usuario
     INNER JOIN detalle_docente ON usuario.id_usuario = detalle_docente.id_docente
-    WHERE usuario.id_usuario = detalle_docente.id_docente`
+    WHERE usuario.id_usuario = detalle_docente.id_docente`,
+    descripcion:
+      'Lista de profesores con su nombre, apellido, departamento y foto de perfil'
   },
-  // 2. Módulo de Login
-  //? Con el número de cédula y el rol (dado por el endpoint desde donde intenta acceder), consultar si el usuario existe, y si tiene ese rol asignado en la tabla asignacion_roles. Si es así, retornar el hash, la salt y validar la contraseña en el back. //? comprobar en el backend si el usuario existe, si tiene ese rol asignado en la tabla asignacion_roles
+  //? 2. Módulo de Login
+  //! comprobar en el backend si el usuario existe, si tiene ese rol asignado en la tabla asignacion_roles
   5: {
-    ruta: '',
-    // metodo: metodos.,
-    parametros: [],
-    consulta: `SELECT usuario.id_usuario, usuario.contrasena_salt, usuario.contrasena_hash, asignacion_roles.fk_id_rol
-        FROM usuario
-        INNER JOIN asignacion_roles ON usuario.id_usuario =     asignacion_roles.fk_id_usuario
-        WHERE asignacion_roles.fk_id_usuario = ?
-        AND asignacion_roles.fk_id_rol = ?`
+    metodo: metodos.get,
+    parametros: ['idUsuario', 'idRol'],
+    consulta: `SELECT u.*, d.*, NULL AS url_hoja_de_vida, NULL AS salario, NULL AS fk_id_tipo_contrato
+    FROM usuario u
+    LEFT JOIN asignacion_roles ar ON u.id_usuario = ar.fk_id_usuario
+    LEFT JOIN detalle_estudiante d ON u.id_usuario = d.id_estudiante AND ar.fk_id_rol = 1
+    LEFT JOIN detalle_docente dd ON u.id_usuario = dd.id_docente AND ar.fk_id_rol = 2
+    LEFT JOIN detalle_administrativo da ON u.id_usuario = da.id_administrativo AND ar.fk_id_rol = 3
+    WHERE u.id_usuario = ? AND ar.fk_id_rol = ?;`,
+    descripcion: 'Todos los datos del usuario accesibles para él'
   },
-  // 3. Módulo estudiante
-  //? 1. Ver los cursos en los que está matriculado y su horario, ver lista de asignaturas matriculadas (ambas cosas se miran en la tabla grupo). ver los programas académicos en los que está registrado, --- la malla curriculado --- y las ---asignaturas aprobadas, matriculadas y no aprobadas --- (nota_estudiante_asignatura_matriculada), ver notas parciales (historial_academico) y notas finales (nota_estudiante_asignatura_matriculada), información de perfil (usuario y detalle), cambiar contraseña
+
+  //? 3. Módulo estudiante
   6: {
-    ruta: '',
-    // metodo: metodos.,
+    metodo: metodos.get,
     parametros: [],
     consulta: `SELECT id_anio_periodo_academico
         FROM anio_periodo_academico
         JOIN institucion_educativa ON anio_periodo_academico.anio = institucion_educativa.anio_vigente
-        AND anio_periodo_academico.fk_id_periodo_academico = institucion_educativa.periodo_academico_vigente;`
+        AND anio_periodo_academico.fk_id_periodo_academico = institucion_educativa.periodo_academico_vigente;`,
+    descripcion: 'id del anio+periodo academio'
   },
-  //? 2. Lista de ofertas académicas de un estudiante(id_estudiante, anio, id_periodo_academico)
+
   7: {
-    ruta: '',
-    // metodo: metodos.,
-    parametros: [],
+    metodo: metodos.get,
+    parametros: ['idEstudiante', 'anio'],
     consulta: `SELECT
         ma.fk_id_oferta_academica,
         pa.id_programa_academico,
@@ -91,13 +117,13 @@ const consultas: Iconsultas = {
         SELECT id_anio_periodo_academico
         FROM anio_periodo_academico
         WHERE anio = ? AND fk_id_periodo_academico = ?
-        );`
+        );`,
+    descripcion: 'Lista de ofertas académicas de un estudiante'
   },
-  //? 3. Historial del estudiante en todos sus grupos de una anio y id_periodo_academico(id_estudiante, anio, id_periodo_academico)
+
   8: {
-    ruta: '',
-    // metodo: metodos.,
-    parametros: [],
+    metodo: metodos.get,
+    parametros: ['idEstudiante', 'anio', 'idPeriodoAcademico'],
     consulta: `SELECT
         historial_academico.fk_id_grupo,
         grupo.numero_grupo,
@@ -118,14 +144,15 @@ const consultas: Iconsultas = {
         SELECT id_anio_periodo_academico
         FROM anio_periodo_academico
         WHERE anio = ? AND fk_id_periodo_academico = ?
-);`
+);`,
+    descripcion:
+      'Historial del estudiante en todos sus grupos de una anio y periodo académico'
   },
-  //? 4. Historial del estudiante en TODA su historia(id_estudiante)
+
   //! Es mejor dejarlo para post entrega :v
   9: {
-    ruta: '',
-    // metodo: metodos.,
-    parametros: [],
+    metodo: metodos.get,
+    parametros: ['idEstudiante'],
     consulta: `SELECT
         historial_academico.fk_id_grupo,
         grupo.numero_grupo,
@@ -141,52 +168,60 @@ const consultas: Iconsultas = {
         JOIN curso ON grupo.fk_id_curso = curso.id
         JOIN asignatura ON curso.fk_id_asignatura = asignatura.id_asignatura
         JOIN oferta_academica ON curso.fk_id_oferta_academica = oferta_academica.id_oferta_academica
-        WHERE historial_academico.fk_id_estudiante = ?;`
+        WHERE historial_academico.fk_id_estudiante = ?;`,
+    descripcion: 'Historial del estudiante en TODA su historia'
   },
-  //? 5. Obtener la matrícula académica de un estudiante(id_estudiante, id_oferta_academica)
+
   10: {
-    ruta: '',
-    // metodo: metodos.,
-    parametros: [],
+    metodo: metodos.get,
+    parametros: ['idEstudiante', 'idOfertaAcademica'],
     consulta: `SELECT id_matricula_academica
         FROM matricula_academica
-        WHERE fk_id_estudiante = ? AND fk_id_oferta_academica = ?;`
+        WHERE fk_id_estudiante = ? AND fk_id_oferta_academica = ?;`,
+    descripcion: 'id de la matrícula académica de un estudiante'
   },
-  //? 6. Historial de notas del semestre(id_estudiante, id_oferta_academica)
+
   11: {
-    ruta: '',
-    // metodo: metodos.,
-    parametros: [],
+    metodo: metodos.get,
+    parametros: ['idEstudiante', 'idOfertaAcademica'],
     consulta: `SELECT a.id_asignatura, a.nombre, n.                nota_final_estudiante_asignatura
         FROM nota_estudiante_asignatura_matriculada n
         JOIN asignatura a ON n.fk_id_asignatura = a.id_asignatura
         JOIN matricula_academica ma ON n.fk_id_matricula_academica = ma.id_matricula_academica
-        WHERE ma.fk_id_estudiante = ? AND ma.fk_id_oferta_academica = ?;`
+        WHERE ma.fk_id_estudiante = ? AND ma.fk_id_oferta_academica = ?;`,
+    descripcion: 'Historial de notas del semestre de un estudiante'
   },
-  //? 7. Obtener información de un estudiante
+
   12: {
-    ruta: '',
-    // metodo: metodos.,
-    parametros: [],
-    consulta: `SELECT usuario.*, detalle_estudiante.*
-        FROM usuario, detalle_estudiante
-        WHERE usuario.id_usuario = ? AND detalle_estudiante.id_estudiante = ?;`
+    metodo: metodos.get,
+    parametros: ['idUsuario'],
+    consulta: `SELECT id_usuario, sexo, nombres, apellidos, correo_electronico, telefono, url_foto, e.*, d.id_docente, d.fk_id_departamento, d.fk_id_tipo_contrato
+    FROM usuario u
+    LEFT JOIN detalle_estudiante e ON u.id_usuario = e.id_estudiante
+    LEFT JOIN detalle_docente d ON u.id_usuario = d.id_docente
+    LEFT JOIN detalle_administrativo a ON u.id_usuario = a.id_administrativo
+    WHERE u.id_usuario = ?;`,
+    descripcion: 'Toda la información accesible de un usuario según su rol'
   },
-  //? 8. Cambiar contraseña usuario (id_usuario, nueva_contrasena_salt, nueva_contrasena_hash)
+
   13: {
-    ruta: '',
-    // metodo: metodos.,
-    parametros: [],
+    metodo: metodos.put,
+    parametros: ['idUsuario'],
     consulta: `UPDATE usuario
         SET contrasena_salt = 'nueva_contrasena_salt',
         contrasena_hash = 'nueva_contrasena_hash'
-        WHERE id_usuario = 1;`
+        WHERE id_usuario = ?;`,
+    descripcion: 'Cambiar contraseña usuario'
   },
-  //? 9. Créditos matriculados por un estudiante en un periodo académico y en un programa académico(d_estudiante, id_programa_academico, anio, id_periodo_tiempo)
+
   14: {
-    ruta: '',
-    // metodo: metodos.,
-    parametros: [],
+    metodo: metodos.get,
+    parametros: [
+      'idEstudiante',
+      'idProgramaAcademico',
+      'anio',
+      'idPeriodoAcademico'
+    ],
     consulta: `SELECT SUM(a.num_creditos) AS     total_creditos_matriculados
         FROM nota_estudiante_asignatura_matriculada AS n
         INNER JOIN matricula_academica AS m ON n.fk_id_matricula_academica = m.id_matricula_academica
@@ -198,13 +233,14 @@ const consultas: Iconsultas = {
         SELECT id_anio_periodo_academico
         FROM anio_periodo_academico
         WHERE anio = ? AND fk_id_periodo_academico = ?
-  );`
+  );`,
+    descripcion:
+      'Créditos matriculados por un estudiante en un periodo académico y en un programa académico'
   },
-  //? 10. Ubicación semestral de un estudiante en un programa académico(id_estudiante, id_oferta_academica)
+
   15: {
-    ruta: '',
-    // metodo: metodos.,
-    parametros: [],
+    metodo: metodos.put,
+    parametros: ['idEstudiante', 'idOfertaAcademica'],
     consulta: `SELECT subquery.creditos_aprobados, subquery.creditos_totales, ROUND(subquery.creditos_aprobados/  subquery.creditos_totales * 100, 2) AS ratio_aprobado
       FROM (
       SELECT SUM(asignatura.num_creditos) AS creditos_aprobados, pa.total_creditos AS creditos_totales
@@ -214,27 +250,28 @@ const consultas: Iconsultas = {
       INNER JOIN programa_academico pa ON oa.fk_id_programa_academico = pa.id_programa_academico
       WHERE aaepa.fk_id_estudiante = ? 
       AND aaepa.fk_id_oferta_academica = ?
-    ) subquery;`
+    ) subquery;`,
+    descripcion: 'Ubicación semestral de un estudiante en un programa académico'
   },
-  //? 11. Último periodo académico que matriculó un estudiante(id_estudiante)
+
   16: {
-    ruta: '',
-    // metodo: metodos.,
-    parametros: [],
+    metodo: metodos.get,
+    parametros: ['idEstudiante'],
     consulta: `SELECT ap.anio, ap.fk_id_periodo_academico AS periodo_academico
       FROM matricula_academica AS ma
       INNER JOIN oferta_academica AS oa ON ma.fk_id_oferta_academica = oa.id_oferta_academica
       INNER JOIN anio_periodo_academico AS ap ON oa.fk_id_anio_periodo_academico = ap.id_anio_periodo_academico
       WHERE ma.fk_id_estudiante = ?
       ORDER BY ap.anio DESC, ap.fk_id_periodo_academico DESC
-      LIMIT 1;`
+      LIMIT 1;`,
+    descripcion: 'Último periodo académico que matriculó un estudiante'
   },
-  //? 12. Registro nota final estudiante en un grupo(id_estudiante, id_grupo) TODO: Esta función se va a eliminar en favor de la 13+1
+
+  //TODO: Esta función se va a eliminar en favor de la 12+1
   17: {
-    ruta: '',
-    // metodo: metodos.,
-    parametros: [],
-    consulta: `INSERT INTO    nota_estudiante_asignatura_matriculada       (fk_id_matricula_academica, fk_id_asignatura, nota_final_estudiante_asignatura)
+    metodo: metodos.post,
+    parametros: ['idEstudiante', 'idGrupo'],
+    consulta: `INSERT INTO nota_estudiante_asignatura_matriculada (fk_id_matricula_academica, fk_id_asignatura, nota_final_estudiante_asignatura)
       SELECT ma.id_matricula_academica, curso.fk_id_asignatura, ((ha.nota_1 + ha.nota_2 + ha.nota_3 + ha.nota_4) / 4) AS promedio
       FROM historial_academico ha
       INNER JOIN grupo ON ha.fk_id_grupo = grupo.id
@@ -246,13 +283,14 @@ const consultas: Iconsultas = {
         WHERE ha.fk_id_estudiante = ?
         AND ha.fk_id_grupo = ?
       )
-      ON DUPLICATE KEY UPDATE nota_final_estudiante_asignatura = (ha.nota_1 + ha.nota_2 + ha.nota_3 + ha.nota_4) / 4;`
+      ON DUPLICATE KEY UPDATE nota_final_estudiante_asignatura = (ha.nota_1 + ha.nota_2 + ha.nota_3 + ha.nota_4) / 4;`,
+    descripcion:
+      'Registra la nota final estudiante en un grupo en la tabla de notas'
   },
-  //? 13. Registrar como aprobada una asignatura por un estudiante si su nota en el grupo es >= 3(id_estudiante, id_grupo)
+
   18: {
-    ruta: '',
-    // metodo: metodos.,
-    parametros: [],
+    metodo: metodos.post,
+    parametros: ['idEstudiante', 'idGrupo'],
     consulta: `INSERT INTO asignaturas_aprobadas_estudiante_programa_academico (fk_id_estudiante, fk_id_oferta_academica, fk_id_asignatura, nota_final_estudiante_asignatura)
     SELECT id_estudiante, id_oferta_academica, id_asignatura, nota_asignatura
     FROM (
@@ -264,13 +302,15 @@ const consultas: Iconsultas = {
     WHERE ha.fk_id_estudiante = ?
       AND ha.fk_id_grupo = ?
   ) AS subquery
-  HAVING nota_asignatura >= ?;`
+  HAVING nota_asignatura >= 3;`,
+    descripcion:
+      'Registrar como aprobada una asignatura por un estudiante si su nota en el grupo es >= 3 en su lista de materias aprobadas en el programa académico correspondiente'
   },
-  //? 14. Promedio de un estudiante en una oferta academica(id_estudiante, id_oferta_academica) //! Hay que probarlo con más datos cuando los estudiantes tengan más notas
+
   19: {
-    ruta: '',
-    // metodo: metodos.,
-    parametros: [],
+    //! Hay que probarlo con más datos cuando los estudiantes tengan más notas
+    metodo: metodos.get,
+    parametros: ['idEstudiante', 'idOfertaAcademica'],
     consulta: `SELECT AVG(ROUND((ha.nota_1 + ha.nota_2 + ha.nota_3 + ha.nota_4) / 4, 1)) AS promedio_semestral
     FROM historial_academico ha
     INNER JOIN grupo ON ha.fk_id_grupo = grupo.id
@@ -278,42 +318,38 @@ const consultas: Iconsultas = {
     INNER JOIN oferta_academica oa ON curso.fk_id_oferta_academica = oa.id_oferta_academica
     WHERE ha.fk_id_estudiante = ?
     AND curso.fk_id_oferta_academica = ?;
-  */`
+  */`,
+    descripcion: 'Promedio de un estudiante en una oferta academica'
   },
-  //? 4. Lista de profesores + detalle(id_usuario) => todos los id_usuario de tabla asignacion_roles where rol == 2 => lista docentes
+
+  //? 3. Módulo de Docente
   20: {
-    ruta: '',
-    // metodo: metodos.,
-    parametros: [],
-    consulta: `SELECT usuario.*, detalle_estudiante.*
-    FROM usuario, detalle_estudiante
-    WHERE usuario.id_usuario = ? AND detalle_estudiante.id_estudiante = ?;`
-  },
-  // 2. Módulo de Docente
-  //? 1. Obtener información de un docente
-  21: {
-    ruta: '',
-    // metodo: metodos.,
-    parametros: [],
-    consulta: `SELECT usuario.*, detalle_docente.*
-    FROM usuario, detalle_docente
-    WHERE usuario.id_usuario = ? AND detalle_docente.id_docente = ?`
-  },
-  //? 2. Ver las asignaturas que enseña un docente(id_docente)
-  22: {
-    ruta: '',
-    // metodo: metodos.,
-    parametros: [],
+    metodo: metodos.get,
+    parametros: ['idDocente'],
     consulta: `SELECT asignatura.*
     FROM docente_asignatura
     INNER JOIN asignatura ON docente_asignatura.fk_id_asignatura = asignatura.id_asignatura
-    WHERE docente_asignatura.fk_id_docente = ?;`
+    WHERE docente_asignatura.fk_id_docente = ?;`,
+    descripcion: 'Lista de las asignaturas que enseña un docente'
   },
-  //? 3. Ver horario de un docente(id_docente, anio, id_periodo_academico)
-  23: {
-    ruta: '',
-    // metodo: metodos.,
-    parametros: [],
+  21: {
+    metodo: metodos.get,
+    parametros: ['idDocente', 'anio', 'idPeriodoAcademico'],
+    consulta: `SELECT grupo.id
+    FROM grupo
+    INNER JOIN curso ON grupo.fk_id_curso = curso.id
+    INNER JOIN oferta_academica ON curso.fk_id_oferta_academica = oferta_academica.id_oferta_academica
+    INNER JOIN anio_periodo_academico ON oferta_academica.fk_id_anio_periodo_academico = anio_periodo_academico.id_anio_periodo_academico
+    WHERE grupo.fk_id_docente_asignado = ?
+    AND anio_periodo_academico.anio = ? 
+    AND anio_periodo_academico.fk_id_periodo_academico= ?`,
+    descripcion:
+      'Lista de grupos en los que enseña un docente en un periodo académico'
+  },
+
+  22: {
+    metodo: metodos.get,
+    parametros: ['idDocente', 'anio', 'idPeriodoAcademico'],
     consulta: `SELECT
     grupo.id,
     grupo.numero_grupo,
@@ -332,7 +368,6 @@ const consultas: Iconsultas = {
     INNER JOIN clase ON clase_dia.fk_id_clase = clase.id_clase
     INNER JOIN ubicacion_clase ON horario_clase.fk_id_ubicacion_clase = ubicacion_clase.id_ubicacion_clase
     WHERE grupo.id IN (
-    //* 3.2. Lista de grupos en los que enseña un docente en un periodo académico(id_docente, anio, id_periodo_academico)
     SELECT grupo.id
     FROM grupo
     INNER JOIN curso ON grupo.fk_id_curso = curso.id
@@ -341,6 +376,7 @@ const consultas: Iconsultas = {
     WHERE grupo.fk_id_docente_asignado = ?
     AND anio_periodo_academico.anio = ? 
     AND anio_periodo_academico.fk_id_periodo_academico= ?
-    );`
+    );`,
+    descripcion: 'Horario de un docente en un periodo academico'
   }
 }

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/indent */
 import type { Response } from 'express'
-import type { RowDataPacket } from 'mysql2'
+import type { OkPacket, RowDataPacket } from 'mysql2'
 
 export interface MiError extends Error {
   status?: number
@@ -9,7 +9,8 @@ export interface MiError extends Error {
 export interface IrespuestaBackend {
   exito: boolean
   estado: number
-  mensaje?: any
+  mensaje?: string
+  descripcion?: string
   respuestaDB?: IrespuestaDB
   error?: any
 }
@@ -25,39 +26,67 @@ export interface Imysql2Error {
 export interface IParametrosenviarRespuesta {
   fallo?: boolean
   res: Response
-  mensaje: string
+  mensaje?: string
+  descripcion?: string
   respuestaDB?: IrespuestaDB
 }
 
-export interface IinsertarNombreTablaEnConsultaParametros {
-  modulo: number
-  numeroConsulta: number
+export interface IobtenerRuta {
+  numeroConsulta: number | string
+  arregloParametros: number[] | string[]
+}
+export interface IparametroNumeroConsulta {
+  numeroConsulta: number | string
+}
+export interface IconsultaRespuesta {
+  consulta: string
+  descripcion: string
 }
 export interface IconsultarDB {
-  consulta: string
+  consulta: IconsultaRespuesta
+  consultaDeLectura: boolean
   arregloParametros?: number[] | string[]
 }
 
 export interface IrespuestaDB {
   exito: boolean
+  descripcion?: string
+  registrosAfectados?: number
   cantidadResultados?: number
-  datos: RowDataPacket[]
+  datos: RowDataPacket | OkPacket
   error?: Imysql2Error
 }
-export const metodos = {
-  get: 'get',
-  post: 'post',
-  put: 'put',
-  delete: 'delete'
+export interface IvalidarRespuestaBD {
+  respuestaDB: IrespuestaDB
+  consultaDeLectura: boolean
+  nConsulta: number
 }
-// export interface Iconsulta {}
+export interface IrespuestaValidada {
+  respuestaRevisadaDB: IrespuestaDB
+  descripcion: string
+  mensaje: string
+}
 export type Iconsultas = Record<
   number,
   {
-    ruta: string
-    metodo?: string // TODO: remove ?
+    metodo: string
+    descripcion: string
     consulta: string
     parametros: string[]
   }
 >
 export type Iconsultas2 = Record<number, Record<number, string>>
+interface Imetodos {
+  get: string
+  post: string
+  put: string
+  delete: string
+}
+
+// Constantes
+export const metodos: Imetodos = {
+  get: 'GET',
+  post: 'POST',
+  put: 'PUT',
+  delete: 'DELETE'
+}

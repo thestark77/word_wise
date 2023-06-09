@@ -1,15 +1,9 @@
-export const errores = {
-  1: 'Error al cargar los programas académicos',
-  2: 'Error al cargar las asignaturas del programa académico',
-  3: '',
-  4: '',
-  5: ''
+export const errores: Record<number, string> = {
+  0: 'Error al acceder a la base de datos'
 }
 
-export const mensajesUsuario = {
-  1: 'Lista de programas',
-  2: 'Lista de asignaturas de un programa',
-  3: '',
-  4: '',
-  5: ''
+export const mensajesUsuario: Record<number, string> = {
+  0: 'Consulta exitosa',
+  1: 'Consulta exitosa pero no se alteró ningún registro',
+  2: 'Consulta exitosa pero no se encontro ningún resultado en la base de datos'
 }
