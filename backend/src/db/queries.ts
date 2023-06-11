@@ -33,7 +33,7 @@ const obtenerRuta = ({
 
 export { obtenerConsulta, obtenerRuta }
 
-const consultas: Iconsultas = {
+export const consultas: Iconsultas = {
   //? 1. Módulo de inicio
   1: {
     metodo: metodos.get,
@@ -204,10 +204,9 @@ const consultas: Iconsultas = {
 
   13: {
     metodo: metodos.post,
-    parametros: ['idUsuario', 'nuevaContrasenaSalt', 'nuevaContrasenaHash'],
+    parametros: ['idUsuario', 'nuevaContrasenaHash'],
     consulta: `UPDATE usuario
-        SET contrasena_salt = ?,
-        contrasena_hash = ?
+        SET contrasena_hash = ?,
         WHERE id_usuario = ?;`,
     descripcion: 'Cambiar contraseña usuario'
   },
@@ -376,5 +375,14 @@ const consultas: Iconsultas = {
     AND anio_periodo_academico.fk_id_periodo_academico= ?
     );`,
     descripcion: 'Horario de un docente en un periodo academico'
+  },
+
+  23: {
+    metodo: metodos.post,
+    parametros: ['idUsuario'],
+    consulta: `SELECT contrasena_hash
+    FROM usuario
+    WHERE id_usuario = ?;`,
+    descripcion: 'Validación de la contraseña de un usuario'
   }
 }

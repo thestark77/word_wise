@@ -63,9 +63,8 @@ CREATE TABLE `usuario` (
   `apellidos` varchar(100) NOT NULL,
   `correo_electronico` varchar(100) UNIQUE NOT NULL,
   `telefono` varchar(20) NOT NULL,
-  `url_foto` varchar(100),
-  `contrasena_salt` varchar(100) NOT NULL,
-  `contrasena_hash` varchar(100) NOT NULL
+  `contrasena_hash` varchar(100) NOT NULL,
+  `url_foto` varchar(100)
 );
 
 CREATE TABLE `detalle_estudiante` (
@@ -405,38 +404,38 @@ INSERT INTO `sexo` (`nombre_sexo`) VALUES
 -- Volcado de datos para la tabla `usuario`
 --
 
-INSERT INTO `usuario` (`id_usuario`, `sexo`, `nombres`, `apellidos`, `correo_electronico`, `telefono`, `contrasena_salt`, `contrasena_hash`, `url_foto`) VALUES
-(1, 1, 'Luis Fernando ', 'Gaviria Trujillo', 'gaviria@correo.com', '123', '123', '123', NULL),
-(2, 1, 'Alexander', 'Molina Cabrera', 'decanoingenierias@utp.edu.co', '123', '123', '123', NULL),
-(3, 1, 'Juan Pablo', 'Trujillo Lemus', 'jtrujillo@utp.edu.co', '123', '123', '123', NULL),
-(4, 1, 'Enrique Demesio', 'Arias Castaño', 'decanaturabellasartes@utp.edu.co', '123', '123', '123', NULL),
-(5, 2, 'Cecilia Luca', 'Escobar Vekeman', 'decaeducacion@utp.edu.co', '123', '123', '123', NULL),
-(6, 1, 'Wilson', 'Arenas Valencia', 'warenas@utp.edu.co', '123', '123', '123', NULL),
-(111, 1, 'Edsger ', 'Dijkstra', 'eDijkstra@utp.edu.co', '111', '111', 'dmfkifj', NULL),
-(222, 1, 'Eduardo', 'Sáenz de Cabezón', 'derivando@utp.edu.co', '222', '222', 'dmfkifj', NULL),
-(333, 1, 'Jose Luis', 'Crespo Cepeda', 'quantumfracture@utp.edu.co', '333', '333', 'dmfkifj', NULL),
+INSERT INTO `usuario` (`id_usuario`, `sexo`, `nombres`, `apellidos`, `correo_electronico`, `telefono`, `contrasena_hash`, `url_foto`) VALUES
+(1, 1, 'Luis Fernando ', 'Gaviria Trujillo', 'gaviria@correo.com', '123', '123', NULL),
+(2, 1, 'Alexander', 'Molina Cabrera', 'decanoingenierias@utp.edu.co', '123', '123', NULL),
+(3, 1, 'Juan Pablo', 'Trujillo Lemus', 'jtrujillo@utp.edu.co', '123', '123', NULL),
+(4, 1, 'Enrique Demesio', 'Arias Castaño', 'decanaturabellasartes@utp.edu.co', '123', '123', NULL),
+(5, 2, 'Cecilia Luca', 'Escobar Vekeman', 'decaeducacion@utp.edu.co', '123', '123', NULL),
+(6, 1, 'Wilson', 'Arenas Valencia', 'warenas@utp.edu.co', '123', '123', NULL),
+(111, 1, 'Edsger ', 'Dijkstra', 'eDijkstra@utp.edu.co', '111', '111', NULL),
+(222, 1, 'Eduardo', 'Sáenz de Cabezón', 'derivando@utp.edu.co', '222', '222', NULL),
+(333, 1, 'Jose Luis', 'Crespo Cepeda', 'quantumfracture@utp.edu.co', '333', '333', NULL),
 (444, 1, 'Javier', 'Santaolalla', 'dateunvoltio@utp.edu.co', '444', '444', 'dmfkifj', NULL),
-(777, 1, 'Ludwig', 'Von Bertalanffy', 'ludwig@utp.edu.co', '777', '777', 'dmfkifj', NULL),
-(6688, 1, 'Richard', 'Dorf', 'dorf@utp.edu.co', '6688', '6688', 'dmfkifj', NULL),
-(999, 1, 'Alan', 'Turing', 'turing@utp.edu.co', '999', '999', 'dmfkifj', NULL),
-(1010, 1, 'Bill', 'Gates', 'bgates@utp.edu.co', '1010', '1010', 'dmfkifj', NULL),
-(1111, 1, 'Thomas', 'Bayes', 'tbayes@utp.edu.co', '1111', '1111', 'dmfkifj', NULL),
-(1212, 1, 'Grady', 'Booch', 'gbooch@utp.edu.co', '1212', '1212', 'dmfkifj', NULL),
-(1314, 1, 'Thomas', 'Floyd', 'floyd@utp.edu.co', '1314', '1314', 'dmfkifj', NULL),
-(123, 2, 'Lady ', 'Gaga', 'bbymonster@utp.edu.co', '911', '123', '123', NULL),
-(124, 1, 'Christopher', 'Bang', 'bangchan@utp.edu.co', '124', '124', '124', NULL),
-(125, 2, 'Perry', 'Edwards', 'perry@utp.edu.co', '125', '125', '125', NULL),
-(126, 1, 'Sam', 'Smith', 'sams@utp.edu.co', '126', '126', '126', NULL),
-(127, 2, 'Ariana', 'Grande', 'ariana@utp.edu.co', '127', '127', '127', NULL),
-(456, 1, 'Harry', 'Styles', 'hstyles@utp.edu.co', '456', '456', '456', NULL),
-(457, 1, 'Luke', 'Hemmings', 'luke@utp.edu.co', '457', '457', '457', NULL),
-(458, 2, 'Billie', 'Eilish', 'b.eilish@utp.edu.co', '458', '458', '458', NULL),
-(459, 1, 'Rami', 'Malek', 'rami@utp.edu.co', '459', '459', '459', NULL),
-(789, 1, 'Elon ', 'Musk', 'tesla@utp.edu.co', '789', '789', '789', NULL),
-(790, 2, 'Dua', 'Lipa', 'dualipa@utp.edu.co', '790', '790', '790', NULL),
-(791, 1, 'Will', 'Smith', 'wsmith@utp.edu.co', '791', '791', '791', NULL),
-(792, 2, 'Selena', 'Gomez', 'selena@utp.edu.co', '792', '792', '792', NULL),
-(12345, 2, 'Maria Camila', 'Ramirez', 'm.ramirez8@utp.edu.co', '3333335', '12345', '12345', NULL);
+(777, 1, 'Ludwig', 'Von Bertalanffy', 'ludwig@utp.edu.co', '777', '777', NULL),
+(6688, 1, 'Richard', 'Dorf', 'dorf@utp.edu.co', '6688', '6688', NULL),
+(999, 1, 'Alan', 'Turing', 'turing@utp.edu.co', '999', '999', NULL),
+(1010, 1, 'Bill', 'Gates', 'bgates@utp.edu.co', '1010', '1010', NULL),
+(1111, 1, 'Thomas', 'Bayes', 'tbayes@utp.edu.co', '1111', '1111', NULL),
+(1212, 1, 'Grady', 'Booch', 'gbooch@utp.edu.co', '1212', '1212', NULL),
+(1314, 1, 'Thomas', 'Floyd', 'floyd@utp.edu.co', '1314', '1314', NULL),
+(123, 2, 'Lady ', 'Gaga', 'bbymonster@utp.edu.co', '911', '123', NULL),
+(124, 1, 'Christopher', 'Bang', 'bangchan@utp.edu.co', '124', '124', NULL),
+(125, 2, 'Perry', 'Edwards', 'perry@utp.edu.co', '125', '125', NULL),
+(126, 1, 'Sam', 'Smith', 'sams@utp.edu.co', '126', '126', NULL),
+(127, 2, 'Ariana', 'Grande', 'ariana@utp.edu.co', '127', '127', NULL),
+(456, 1, 'Harry', 'Styles', 'hstyles@utp.edu.co', '456', '456', NULL),
+(457, 1, 'Luke', 'Hemmings', 'luke@utp.edu.co', '457', '457', NULL),
+(458, 2, 'Billie', 'Eilish', 'b.eilish@utp.edu.co', '458', '458', NULL),
+(459, 1, 'Rami', 'Malek', 'rami@utp.edu.co', '459', '459', NULL),
+(789, 1, 'Elon ', 'Musk', 'tesla@utp.edu.co', '789', '789', NULL),
+(790, 2, 'Dua', 'Lipa', 'dualipa@utp.edu.co', '790', '790', NULL),
+(791, 1, 'Will', 'Smith', 'wsmith@utp.edu.co', '791', '791', NULL),
+(792, 2, 'Selena', 'Gomez', 'selena@utp.edu.co', '792', '792', NULL),
+(12345, 2, 'Maria Camila', 'Ramirez', 'm.ramirez8@utp.edu.co', '3333335', '12345', NULL);
 COMMIT;
 
 

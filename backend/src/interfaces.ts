@@ -11,7 +11,8 @@ export interface IrespuestaBackend {
   estado: number
   mensaje?: string
   descripcion?: string
-  respuestaDB?: IrespuestaDB
+  respuestaBD?: IrespuestaBD
+  datosConsultaEspecial?: any
   error?: any
 }
 export interface Imysql2Error {
@@ -28,7 +29,8 @@ export interface IParametrosenviarRespuesta {
   res: Response
   mensaje?: string
   descripcion?: string
-  respuestaDB?: IrespuestaDB
+  respuestaBD?: IrespuestaBD
+  datosConsultaEspecial?: any
 }
 
 export interface IobtenerRuta {
@@ -40,13 +42,22 @@ export interface IconsultaRespuesta {
   descripcion: string
   cantidadDeParametros: number
 }
-export interface IconsultarDB {
+export interface IconsultarBD {
   consulta: IconsultaRespuesta
-  consultaDeLectura: boolean
   arregloParametros?: number[] | string[]
 }
+export interface IconsultarBDPOST {
+  res: Response
+  body: Ibody
+  parametrosValidados: IvalidacionParametros
+}
 
-export interface IrespuestaDB {
+export type Ibody = Record<string, any>
+
+export interface IcontrasenaUsuarioBD {
+  contrasena_hash: string
+}
+export interface IrespuestaBD {
   exito: boolean
   descripcion?: string
   registrosAfectados?: number
@@ -55,28 +66,43 @@ export interface IrespuestaDB {
   error?: Imysql2Error
 }
 export interface IvalidarRespuestaBD {
-  respuestaDB: IrespuestaDB
+  respuestaBD: IrespuestaBD
   consultaDeLectura: boolean
   nConsulta: number
 }
-export interface IrespuestaValidada {
-  respuestaRevisadaDB: IrespuestaDB
+export interface IrespuestaBDValidada {
+  respuestaRevisadaBD: IrespuestaBD
   descripcion: string
   mensaje: string
 }
 
 export interface IvalidarParametrosConsulta {
   numeroConsulta: string
-  parametro1: string
-  parametro2: string
-  parametro3: string
+  almacenDeConsulas: IalmacenDeConsulas
+  parametros?: string[]
 }
-export interface IvalidarParametrosRespuesta {
+export interface IvalidacionParametros {
   parametrosCorrectos: boolean
-  consulta?: IconsultaRespuesta
+  consultaDeLectura: boolean
+  nConsulta: number
+  consulta: IconsultaRespuesta
   mensaje?: string
   arregloParametros?: number[]
-  nConsulta: number
+}
+export interface IencriptarContrasena {
+  encriptacionExitosa: boolean
+  contrasenaHash: string
+  error?: any
+}
+export interface IcompararContrasena {
+  comparacionExitosa: boolean
+  contrasenaCorrecta: boolean
+  error?: string
+}
+
+export interface IvalidarContrasena {
+  contrasenaIngresada: string
+  contrasenaHash: string
 }
 
 export type Iconsultas = Record<
@@ -89,6 +115,12 @@ export type Iconsultas = Record<
   }
 >
 export type Iconsultas2 = Record<number, Record<number, string>>
+
+export type IalmacenDeConsulas = Record<
+  number,
+  (parametros: IconsultarBDPOST) => Promise<void>
+>
+
 interface Imetodos {
   get: string
   post: string

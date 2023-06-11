@@ -1,26 +1,21 @@
 /* eslint-disable @typescript-eslint/indent */
 import type { OkPacket, RowDataPacket } from 'mysql2'
 import { db } from '../db/db'
-import type { IconsultarDB, Imysql2Error, IrespuestaDB } from '../interfaces'
+import type { IconsultarBD, Imysql2Error, IrespuestaBD } from '../interfaces'
 
-const consultarEnDB = async ({
+const consultarEnBD = async ({
   consulta,
-  arregloParametros,
-  consultaDeLectura = true
-}: IconsultarDB): Promise<IrespuestaDB> => {
-  let respuesta: IrespuestaDB = { exito: false, datos: [] as RowDataPacket }
+  arregloParametros
+}: IconsultarBD): Promise<IrespuestaBD> => {
+  let respuesta: IrespuestaBD = { exito: false, datos: [] as RowDataPacket }
   const parametros = arregloParametros ?? []
 
   let datos: RowDataPacket | OkPacket
 
   try {
-    if (consultaDeLectura) {
-      datos = (
-        (await db.query(consulta.consulta, parametros)) as RowDataPacket[]
-      )[0]
-    } else {
-      datos = ((await db.query(consulta.consulta, parametros)) as OkPacket[])[0]
-    }
+    datos = (
+      (await db.query(consulta.consulta, parametros)) as RowDataPacket[]
+    )[0]
     respuesta = {
       exito: true,
       descripcion: consulta.descripcion,
@@ -38,4 +33,4 @@ const consultarEnDB = async ({
   return respuesta
 }
 
-export { consultarEnDB }
+export { consultarEnBD }

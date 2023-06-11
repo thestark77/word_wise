@@ -1,59 +1,127 @@
 import type { Request, Response } from 'express'
-import { metodos, type IconsultaRespuesta } from '../interfaces'
+import { type RowDataPacket } from 'mysql2'
+import type {
+  IalmacenDeConsulas,
+  Ibody,
+  IconsultarBDPOST,
+  IcontrasenaUsuarioBD
+} from '../interfaces'
+import { errores } from '../utils/dictionaries'
 import {
   enviarRespuesta,
+  validarContrasena,
   validarParametrosConsulta,
   validarRespuestaBD
 } from './auxiliar.functions'
-import { consultarEnDB } from './controller'
+import { consultarEnBD } from './controller'
+
+const validarContrasenaUsuario = async ({
+  res,
+  body,
+  parametrosValidados
+}: IconsultarBDPOST): Promise<void> => {
+  const { idUsuario, contrasenaIngresada } = body
+  let mensaje: string | undefined
+  let datosParaEnviar
+
+  const respuestaBD = await consultarEnBD({
+    consulta: parametrosValidados.consulta,
+    arregloParametros: [idUsuario]
+  })
+
+  const respuestaBDValidada = validarRespuestaBD({
+    respuestaBD,
+    consultaDeLectura: parametrosValidados.consultaDeLectura,
+    nConsulta: parametrosValidados.nConsulta
+  })
+
+  const comparacionContrasena = await validarContrasena({
+    contrasenaIngresada: contrasenaIngresada as string,
+    contrasenaHash: (
+      (
+        respuestaBDValidada.respuestaRevisadaBD.datos as RowDataPacket
+      )[0] as IcontrasenaUsuarioBD
+    ).contrasena_hash
+  })
+
+  if (comparacionContrasena.comparacionExitosa) {
+    datosParaEnviar = comparacionContrasena
+  } else {
+    mensaje = comparacionContrasena.error
+  }
+
+  enviarRespuesta({
+    res,
+    datosConsultaEspecial: datosParaEnviar,
+    descripcion: respuestaBD.descripcion,
+    mensaje
+  })
+}
+
+const almacenDeConsulas: IalmacenDeConsulas = {
+  23: validarContrasenaUsuario
+}
 
 const manejadorDeConsultas = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   const { numeroConsulta, parametro1, parametro2, parametro3 } = req.query
-  const metodo = req.method
-  const consultaDeLectura = metodo !== metodos.post
 
-  const {
-    nConsulta,
-    parametrosCorrectos,
-    consulta,
-    mensaje: mensajeValidacion,
-    arregloParametros
-  } = validarParametrosConsulta({
+  const parametrosValidados = validarParametrosConsulta({
     numeroConsulta: numeroConsulta as string,
-    parametro1: parametro1 as string,
-    parametro2: parametro2 as string,
-    parametro3: parametro3 as string
+    almacenDeConsulas,
+    parametros: [
+      parametro1 as string,
+      parametro2 as string,
+      parametro3 as string
+    ]
   })
 
-  if (!parametrosCorrectos) {
+  if (!parametrosValidados.parametrosCorrectos) {
     enviarRespuesta({
       res,
-      mensaje: mensajeValidacion
+      mensaje: parametrosValidados.mensaje
     })
     return
   }
 
-  const respuestaDB = await consultarEnDB({
-    consulta: consulta as IconsultaRespuesta,
-    arregloParametros,
-    consultaDeLectura
-  })
+  if (parametrosValidados.consultaDeLectura) {
+    const respuestaBD = await consultarEnBD({
+      consulta: parametrosValidados.consulta,
+      arregloParametros: parametrosValidados.arregloParametros
+    })
 
-  const { respuestaRevisadaDB, descripcion, mensaje } = validarRespuestaBD({
-    respuestaDB,
-    consultaDeLectura,
-    nConsulta
-  })
+    const respuestaBDValidada = validarRespuestaBD({
+      respuestaBD,
+      consultaDeLectura: parametrosValidados.consultaDeLectura,
+      nConsulta: parametrosValidados.nConsulta
+    })
 
-  enviarRespuesta({
-    res,
-    descripcion,
-    respuestaDB: respuestaRevisadaDB,
-    mensaje
-  })
+    enviarRespuesta({
+      res,
+      descripcion: respuestaBDValidada.descripcion,
+      respuestaBD: respuestaBDValidada.respuestaRevisadaBD,
+      mensaje: respuestaBDValidada.mensaje
+    })
+  } else {
+    const nConsulta = parametrosValidados.nConsulta
+    if (
+      almacenDeConsulas[nConsulta] !== undefined &&
+      almacenDeConsulas[nConsulta] !== null
+    ) {
+      await almacenDeConsulas[nConsulta]({
+        res,
+        body: req.body as Ibody,
+        parametrosValidados
+      })
+    } else {
+      enviarRespuesta({
+        res,
+        mensaje: errores[6]
+      })
+    }
+  }
 }
 
 export { manejadorDeConsultas }
