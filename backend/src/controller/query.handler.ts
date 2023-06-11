@@ -1,10 +1,10 @@
 import type { Request, Response } from 'express'
 import { type RowDataPacket } from 'mysql2'
 import type {
-  IalmacenDeConsulas,
   Ibody,
   IcompararContrasena,
   IconsultarBDPOST,
+  IconsultasEspeciales,
   IcontrasenaUsuarioBD
 } from '../interfaces'
 import { errores } from '../utils/dictionaries'
@@ -63,7 +63,7 @@ const validarContrasenaUsuario = async ({
   })
 }
 
-const almacenDeConsulas: IalmacenDeConsulas = {
+const consultasEspeciales: IconsultasEspeciales = {
   23: validarContrasenaUsuario
 }
 
@@ -75,7 +75,7 @@ const manejadorDeConsultas = async (
 
   const parametrosValidados = validarParametrosConsulta({
     numeroConsulta: numeroConsulta as string,
-    almacenDeConsulas,
+    consultasEspeciales,
     parametros: [
       parametro1 as string,
       parametro2 as string,
@@ -86,7 +86,8 @@ const manejadorDeConsultas = async (
   if (!parametrosValidados.parametrosCorrectos) {
     enviarRespuesta({
       res,
-      mensaje: parametrosValidados.mensaje
+      mensaje: parametrosValidados.mensaje,
+      fallo: true
     })
     return
   }
@@ -112,16 +113,17 @@ const manejadorDeConsultas = async (
   } else {
     const nConsulta = parametrosValidados.nConsulta
     if (
-      almacenDeConsulas[nConsulta] !== undefined &&
-      almacenDeConsulas[nConsulta] !== null
+      consultasEspeciales[nConsulta] !== undefined &&
+      consultasEspeciales[nConsulta] !== null
     ) {
-      await almacenDeConsulas[nConsulta]({
+      await consultasEspeciales[nConsulta]({
         res,
         body: req.body as Ibody,
         parametrosValidados
       })
     } else {
       enviarRespuesta({
+        fallo: true,
         res,
         mensaje: errores[6]
       })
