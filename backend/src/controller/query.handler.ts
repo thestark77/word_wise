@@ -3,6 +3,7 @@ import { type RowDataPacket } from 'mysql2'
 import type {
   IalmacenDeConsulas,
   Ibody,
+  IcompararContrasena,
   IconsultarBDPOST,
   IcontrasenaUsuarioBD
 } from '../interfaces'
@@ -22,7 +23,10 @@ const validarContrasenaUsuario = async ({
 }: IconsultarBDPOST): Promise<void> => {
   const { idUsuario, contrasenaIngresada } = body
   let mensaje: string | undefined
-  let datosParaEnviar
+  let comparacionContrasena: IcompararContrasena = {
+    comparacionExitosa: false,
+    contrasenaCorrecta: false
+  }
 
   const respuestaBD = await consultarEnBD({
     consulta: parametrosValidados.consulta,
@@ -35,24 +39,25 @@ const validarContrasenaUsuario = async ({
     nConsulta: parametrosValidados.nConsulta
   })
 
-  const comparacionContrasena = await validarContrasena({
-    contrasenaIngresada: contrasenaIngresada as string,
-    contrasenaHash: (
-      (
-        respuestaBDValidada.respuestaRevisadaBD.datos as RowDataPacket
-      )[0] as IcontrasenaUsuarioBD
-    ).contrasena_hash
-  })
+  const resultadosConsulta = respuestaBDValidada.respuestaRevisadaBD
+    .datos as RowDataPacket[]
 
-  if (comparacionContrasena.comparacionExitosa) {
-    datosParaEnviar = comparacionContrasena
+  if (resultadosConsulta.length > 0) {
+    comparacionContrasena = await validarContrasena({
+      contrasenaIngresada: contrasenaIngresada as string,
+      contrasenaHash: (resultadosConsulta[0] as IcontrasenaUsuarioBD)
+        .contrasena_hash
+    })
+    mensaje = comparacionContrasena.comparacionExitosa
+      ? undefined
+      : comparacionContrasena.error
   } else {
-    mensaje = comparacionContrasena.error
+    mensaje = errores[7]
   }
 
   enviarRespuesta({
     res,
-    datosConsultaEspecial: datosParaEnviar,
+    datosConsultaEspecial: comparacionContrasena,
     descripcion: respuestaBD.descripcion,
     mensaje
   })
