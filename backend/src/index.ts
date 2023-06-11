@@ -13,6 +13,7 @@ import { NODE_ENV, PORT } from './config/config'
 import { enviarRespuesta } from './controller/auxiliar.functions'
 import { type MiError } from './interfaces'
 import { Router } from './routes/index.router'
+import { errores } from './utils/dictionaries'
 
 const app: Application = express()
 
@@ -31,7 +32,7 @@ app.use('/api', Router)
 
 // catch 404 and forward to error handler
 app.use((req: Request, res: Response, next: NextFunction) => {
-  enviarRespuesta({ res, fallo: true, mensaje: 'Error, ruta no encontrada' })
+  enviarRespuesta({ res, fallo: true, mensaje: errores[1] })
 })
 
 // error handler
@@ -45,7 +46,7 @@ app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
 })
 
 app.listen(PORT)
-console.log(`Server on port: ${PORT}`)
-console.log(`Node env: ${NODE_ENV}`)
+console.log(`Servidor en el puerto: ${PORT}`)
+console.log(`Entorno de Node: ${NODE_ENV}`)
 
 export default app

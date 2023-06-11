@@ -1,9 +1,12 @@
 // import { pool } from '../db/db'
 import { type OkPacket } from 'mysql2'
+import { obtenerConsulta } from '../db/queries'
 import type {
   IParametrosenviarRespuesta,
   IrespuestaBackend,
   IrespuestaValidada,
+  IvalidarParametrosConsulta,
+  IvalidarParametrosRespuesta,
   IvalidarRespuestaBD
 } from '../interfaces'
 import { errores, mensajesUsuario } from '../utils/dictionaries'
@@ -44,6 +47,46 @@ const validarRespuestaBD = ({
   }
 
   return respuestaValidada
+}
+
+const validarParametrosConsulta = ({
+  numeroConsulta,
+  parametro1,
+  parametro2,
+  parametro3
+}: IvalidarParametrosConsulta): IvalidarParametrosRespuesta => {
+  const nConsulta = Number(numeroConsulta)
+  let validacionParametros: IvalidarParametrosRespuesta = {
+    parametrosCorrectos: false,
+    nConsulta: 0
+  }
+
+  if (nConsulta !== undefined && nConsulta !== null) {
+    const consulta = obtenerConsulta(nConsulta)
+    let arregloParametros = [
+      Number(parametro1),
+      Number(parametro2),
+      Number(parametro3)
+    ]
+    arregloParametros = arregloParametros.filter(
+      (parametro) => parametro !== undefined && parametro !== null
+    )
+
+    if (arregloParametros.length >= consulta.cantidadDeParametros) {
+      validacionParametros = {
+        parametrosCorrectos: true,
+        nConsulta,
+        consulta,
+        arregloParametros
+      }
+    } else {
+      validacionParametros.mensaje = errores[3]
+    }
+  } else {
+    validacionParametros.mensaje = errores[2]
+  }
+
+  return validacionParametros
 }
 
 const enviarRespuesta = ({
@@ -88,4 +131,4 @@ const enviarRespuesta = ({
   res.status(respuestaBackend.estado).json(respuestaBackend)
 }
 
-export { enviarRespuesta, validarRespuestaBD }
+export { enviarRespuesta, validarParametrosConsulta, validarRespuestaBD }

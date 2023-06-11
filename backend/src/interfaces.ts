@@ -35,12 +35,10 @@ export interface IobtenerRuta {
   numeroConsulta: number | string
   arregloParametros: number[] | string[]
 }
-export interface IparametroNumeroConsulta {
-  numeroConsulta: number | string
-}
 export interface IconsultaRespuesta {
   consulta: string
   descripcion: string
+  cantidadDeParametros: number
 }
 export interface IconsultarDB {
   consulta: IconsultaRespuesta
@@ -66,6 +64,21 @@ export interface IrespuestaValidada {
   descripcion: string
   mensaje: string
 }
+
+export interface IvalidarParametrosConsulta {
+  numeroConsulta: string
+  parametro1: string
+  parametro2: string
+  parametro3: string
+}
+export interface IvalidarParametrosRespuesta {
+  parametrosCorrectos: boolean
+  consulta?: IconsultaRespuesta
+  mensaje?: string
+  arregloParametros?: number[]
+  nConsulta: number
+}
+
 export type Iconsultas = Record<
   number,
   {

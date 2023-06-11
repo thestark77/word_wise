@@ -2,16 +2,14 @@ import {
   metodos,
   type IconsultaRespuesta,
   type Iconsultas,
-  type IobtenerRuta,
-  type IparametroNumeroConsulta
+  type IobtenerRuta
 } from '../interfaces'
 
-const obtenerConsulta = ({
-  numeroConsulta
-}: IparametroNumeroConsulta): IconsultaRespuesta => {
+const obtenerConsulta = (numeroConsulta: number): IconsultaRespuesta => {
   const consultaRespuesta: IconsultaRespuesta = {
-    consulta: consultas[Number(numeroConsulta)].consulta,
-    descripcion: consultas[Number(numeroConsulta)].descripcion ?? ''
+    consulta: consultas[numeroConsulta].consulta,
+    descripcion: consultas[numeroConsulta].descripcion ?? '',
+    cantidadDeParametros: consultas[numeroConsulta].parametros.length
   }
 
   return consultaRespuesta
@@ -22,8 +20,9 @@ const obtenerRuta = ({
   numeroConsulta,
   arregloParametros
 }: IobtenerRuta): string => {
-  // rutaLectura = http://localhost:3000/api/lectura | ?numeroConsulta=1&parametro2=222&parametro1=1&parametro3=333
-  // rutaEscritura = http://localhost:3000/api/escritura | ?numeroConsulta=1&parametro2=222&parametro1=1&parametro3=333
+  // rutaLectura = http://localhost:3000/api/lectura?numeroConsulta=1&parametro1=111&parametro2=222&parametro3=333
+  // rutaLectura = http://localhost:3000/api/escritura?numeroConsulta=1&parametro1=111&parametro2=222&parametro3=333
+  //TODO: importar endpoint base de las variables de entorno y ponerlo al inicio de la ruta
   let ruta = `?numeroConsulta=${numeroConsulta}`
   arregloParametros.forEach((parametro, indice) => {
     ruta += `&parametro${indice + 1}=${parametro}`
@@ -72,7 +71,6 @@ const consultas: Iconsultas = {
       'Lista de profesores con su nombre, apellido, departamento y foto de perfil'
   },
   //? 2. Módulo de Login
-  //! comprobar en el backend si el usuario existe, si tiene ese rol asignado en la tabla asignacion_roles
   5: {
     metodo: metodos.get,
     parametros: ['idUsuario', 'idRol'],
@@ -205,11 +203,11 @@ const consultas: Iconsultas = {
   },
 
   13: {
-    metodo: metodos.put,
-    parametros: ['idUsuario'],
+    metodo: metodos.post,
+    parametros: ['idUsuario', 'nuevaContrasenaSalt', 'nuevaContrasenaHash'],
     consulta: `UPDATE usuario
-        SET contrasena_salt = 'nueva_contrasena_salt',
-        contrasena_hash = 'nueva_contrasena_hash'
+        SET contrasena_salt = ?,
+        contrasena_hash = ?
         WHERE id_usuario = ?;`,
     descripcion: 'Cambiar contraseña usuario'
   },
@@ -239,7 +237,7 @@ const consultas: Iconsultas = {
   },
 
   15: {
-    metodo: metodos.put,
+    metodo: metodos.post,
     parametros: ['idEstudiante', 'idOfertaAcademica'],
     consulta: `SELECT subquery.creditos_aprobados, subquery.creditos_totales, ROUND(subquery.creditos_aprobados/  subquery.creditos_totales * 100, 2) AS ratio_aprobado
       FROM (

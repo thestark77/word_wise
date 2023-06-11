@@ -1,7 +1,10 @@
 import type { Request, Response } from 'express'
-import { obtenerConsulta } from '../db/queries'
-import { metodos } from '../interfaces'
-import { enviarRespuesta, validarRespuestaBD } from './auxiliar.functions'
+import { metodos, type IconsultaRespuesta } from '../interfaces'
+import {
+  enviarRespuesta,
+  validarParametrosConsulta,
+  validarRespuestaBD
+} from './auxiliar.functions'
 import { consultarEnDB } from './controller'
 
 const manejadorDeConsultas = async (
@@ -12,20 +15,29 @@ const manejadorDeConsultas = async (
   const metodo = req.method
   const consultaDeLectura = metodo !== metodos.post
 
-  const nConsulta = Number(numeroConsulta ?? 0)
-  const consulta = obtenerConsulta({ numeroConsulta: nConsulta })
+  const {
+    nConsulta,
+    parametrosCorrectos,
+    consulta,
+    mensaje: mensajeValidacion,
+    arregloParametros
+  } = validarParametrosConsulta({
+    numeroConsulta: numeroConsulta as string,
+    parametro1: parametro1 as string,
+    parametro2: parametro2 as string,
+    parametro3: parametro3 as string
+  })
 
-  let arregloParametros = [
-    Number(parametro1),
-    Number(parametro2),
-    Number(parametro3)
-  ]
-  arregloParametros = arregloParametros.filter(
-    (parametro) => parametro !== undefined && parametro !== null
-  )
+  if (!parametrosCorrectos) {
+    enviarRespuesta({
+      res,
+      mensaje: mensajeValidacion
+    })
+    return
+  }
 
   const respuestaDB = await consultarEnDB({
-    consulta,
+    consulta: consulta as IconsultaRespuesta,
     arregloParametros,
     consultaDeLectura
   })
