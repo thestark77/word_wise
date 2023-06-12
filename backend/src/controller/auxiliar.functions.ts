@@ -6,8 +6,11 @@ import { consultas, obtenerConsulta } from '../db/queries'
 import type {
   IParametrosenviarRespuesta,
   IcompararContrasena,
+  IcontrasenaProcesada,
+  IcontrasenaUsuarioBD,
   IencriptarContrasena,
   IerrorSQLFiltrado,
+  IprocesarContrasena,
   IrespuestaBDValidada,
   IrespuestaBackend,
   IvalidacionParametros,
@@ -54,6 +57,7 @@ const validarRespuestaBD = ({
 }
 
 const validarParametrosConsulta = ({
+  res,
   numeroConsulta,
   consultasEspeciales,
   parametros = []
@@ -77,7 +81,7 @@ const validarParametrosConsulta = ({
         (parametro) =>
           parametro !== undefined && parametro !== null && parametro !== ''
       )
-      .map((parametro) => Number(parametro))
+      .map((parametro) => (parametro as string).toString())
 
     validacionParametros.consulta = consulta
     validacionParametros.arregloParametros = arregloParametros
@@ -94,6 +98,14 @@ const validarParametrosConsulta = ({
     }
   } else {
     validacionParametros.mensaje = errores[2]
+  }
+
+  if (!validacionParametros.parametrosCorrectos) {
+    enviarRespuesta({
+      res,
+      mensaje: validacionParametros.mensaje,
+      fallo: true
+    })
   }
 
   return validacionParametros
@@ -150,7 +162,8 @@ const enviarRespuesta = ({
       estado: 200,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       datosConsultaEspecial,
-      mensaje
+      mensaje,
+      descripcion
     }
   } else if (fallo !== undefined && fallo) {
     respuestaBackend = {
@@ -158,7 +171,8 @@ const enviarRespuesta = ({
       estado: 500,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       datosConsultaEspecial,
-      mensaje
+      mensaje,
+      descripcion
     }
   }
 
@@ -168,14 +182,14 @@ const enviarRespuesta = ({
 const encriptarContrasena = async (
   contrasena: string
 ): Promise<IencriptarContrasena> => {
-  // TODO: hacer una función para crear contraseñas hasheadas rápido y probar el login
   let contrasenaEncriptada: IencriptarContrasena = {
     encriptacionExitosa: false,
     contrasenaHash: ''
   }
   try {
     // Generar el hash
-    const contrasenaHash: string = await bcrypt.hash(contrasena, SALT_ROUNDS)
+    const contrasenaHash = await bcrypt.hash(contrasena, Number(SALT_ROUNDS))
+
     contrasenaEncriptada = {
       encriptacionExitosa: true,
       contrasenaHash
@@ -196,8 +210,8 @@ const validarContrasena = async ({
   }
   try {
     const contrasenaCoincide = await bcrypt.compare(
-      contrasenaIngresada.toString(),
-      contrasenaHash.toString()
+      (contrasenaIngresada as string).toString(),
+      (contrasenaHash as string).toString()
     )
     if (contrasenaCoincide) {
       contrasenaComparada.comparacionExitosa = true
@@ -211,9 +225,38 @@ const validarContrasena = async ({
   return contrasenaComparada
 }
 
+const procesarContrasena = async ({
+  resultadosConsulta,
+  contrasenaIngresada
+}: IprocesarContrasena): Promise<IcontrasenaProcesada> => {
+  let mensaje: string | undefined
+  let comparacionContrasena: IcompararContrasena = {
+    comparacionExitosa: false,
+    contrasenaCorrecta: false
+  }
+  if (resultadosConsulta.length > 0) {
+    comparacionContrasena = await validarContrasena({
+      contrasenaIngresada: contrasenaIngresada as string,
+      contrasenaHash: (resultadosConsulta[0] as IcontrasenaUsuarioBD)
+        .contrasena_hash
+    })
+    mensaje = comparacionContrasena.comparacionExitosa
+      ? undefined
+      : comparacionContrasena.error
+  } else {
+    mensaje = errores[7]
+  }
+  const contrasenaProcesada: IcontrasenaProcesada = {
+    mensaje,
+    comparacionContrasena
+  }
+  return contrasenaProcesada
+}
+
 export {
   encriptarContrasena,
   enviarRespuesta,
+  procesarContrasena,
   validarContrasena,
   validarParametrosConsulta,
   validarRespuestaBD

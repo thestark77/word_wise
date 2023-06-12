@@ -55,7 +55,7 @@ export interface IconsultarBD {
 export interface IconsultarBDPOST {
   res: Response
   body: Ibody
-  parametrosValidados: IvalidacionParametros
+  nConsulta: number
 }
 
 export type Ibody = Record<string, any>
@@ -82,9 +82,24 @@ export interface IrespuestaBDValidada {
 }
 
 export interface IvalidarParametrosConsulta {
-  numeroConsulta: string
+  res: Response
+  numeroConsulta: string | number
   consultasEspeciales: IconsultasEspeciales
-  parametros?: string[]
+  parametros?: any[]
+}
+export interface IconsultaDBconValidacionTotal {
+  res: Response
+  nConsulta: number
+  nuevoArregloParametros: any[]
+}
+export interface IparametrosYConsultaValidados {
+  parametrosCorrectos: boolean
+  resultadosConsulta: RowDataPacket[] | undefined
+  descripcion: string | undefined
+}
+export interface IprocesarContrasena {
+  resultadosConsulta: RowDataPacket[]
+  contrasenaIngresada: any
 }
 export interface IvalidacionParametros {
   parametrosCorrectos: boolean
@@ -92,12 +107,12 @@ export interface IvalidacionParametros {
   nConsulta: number
   consulta: IconsultaRespuesta
   mensaje?: string
-  arregloParametros?: number[]
+  arregloParametros?: string[]
 }
 export interface IencriptarContrasena {
   encriptacionExitosa: boolean
   contrasenaHash: string
-  error?: any
+  error?: string
 }
 export interface IcompararContrasena {
   comparacionExitosa: boolean
@@ -106,8 +121,12 @@ export interface IcompararContrasena {
 }
 
 export interface IvalidarContrasena {
-  contrasenaIngresada: string
-  contrasenaHash: string
+  contrasenaIngresada: any
+  contrasenaHash: any
+}
+export interface IcontrasenaProcesada {
+  comparacionContrasena: IcompararContrasena
+  mensaje?: string
 }
 
 export type Iconsultas = Record<

@@ -97,7 +97,7 @@ export const consultas: Iconsultas = {
 
   7: {
     metodo: metodos.get,
-    parametros: ['idEstudiante', 'anio'],
+    parametros: ['idEstudiante', 'anio', 'idPeriodoAcademico'],
     consulta: `SELECT
         ma.fk_id_oferta_academica,
         pa.id_programa_academico,
@@ -147,7 +147,7 @@ export const consultas: Iconsultas = {
       'Historial del estudiante en todos sus grupos de una anio y periodo académico'
   },
 
-  //! Es mejor dejarlo para post entrega :v
+  //! Es mejor dejarlo para después de la entrega :v
   9: {
     metodo: metodos.get,
     parametros: ['idEstudiante'],
@@ -204,11 +204,15 @@ export const consultas: Iconsultas = {
 
   13: {
     metodo: metodos.post,
-    parametros: ['idUsuario', 'nuevaContrasenaHash'],
+    parametros: [],
     consulta: `UPDATE usuario
         SET contrasena_hash = ?,
         WHERE id_usuario = ?;`,
     descripcion: 'Cambiar contraseña usuario'
+    // parametros: {
+    //   "idUsuario": 123,
+    //   "nuevaContrasena": "123"
+    // }
   },
 
   14: {
@@ -286,7 +290,7 @@ export const consultas: Iconsultas = {
   },
 
   18: {
-    metodo: metodos.post,
+    metodo: metodos.get,
     parametros: ['idEstudiante', 'idGrupo'],
     consulta: `INSERT INTO asignaturas_aprobadas_estudiante_programa_academico (fk_id_estudiante, fk_id_oferta_academica, fk_id_asignatura, nota_final_estudiante_asignatura)
     SELECT id_estudiante, id_oferta_academica, id_asignatura, nota_asignatura

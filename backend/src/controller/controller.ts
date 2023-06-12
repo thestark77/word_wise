@@ -1,7 +1,14 @@
 /* eslint-disable @typescript-eslint/indent */
 import type { OkPacket, RowDataPacket } from 'mysql2'
 import { db } from '../db/db'
-import type { IconsultarBD, Imysql2Error, IrespuestaBD } from '../interfaces'
+import type {
+  IconsultarBD,
+  Imysql2Error,
+  IrespuestaBD,
+  IrespuestaBDValidada,
+  IvalidacionParametros
+} from '../interfaces'
+import { validarRespuestaBD } from './auxiliar.functions'
 
 const consultarEnBD = async ({
   consulta,
@@ -30,8 +37,24 @@ const consultarEnBD = async ({
       error: error as Imysql2Error
     }
   }
-  console.log(respuesta.descripcion)
+
   return respuesta
 }
 
-export { consultarEnBD }
+const consultarEnBDYValidar = async (
+  parametrosValidados: IvalidacionParametros
+): Promise<IrespuestaBDValidada> => {
+  const respuestaBD = await consultarEnBD({
+    consulta: parametrosValidados.consulta,
+    arregloParametros: parametrosValidados.arregloParametros
+  })
+
+  const respuestaBDValidada = validarRespuestaBD({
+    respuestaBD,
+    consultaDeLectura: parametrosValidados.consultaDeLectura
+  })
+
+  return respuestaBDValidada
+}
+
+export { consultarEnBDYValidar }
