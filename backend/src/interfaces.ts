@@ -69,13 +69,15 @@ export interface IrespuestaBD {
   registrosAfectados?: number
   cantidadResultados?: number
   datos: RowDataPacket | OkPacket
-  error?: Imysql2Error
+  error?: Imysql2Error | IerrorSQLFiltrado
 }
 export interface IvalidarRespuestaBD {
+  res: Response
   respuestaBD: IrespuestaBD
   consultaDeLectura: boolean
 }
 export interface IrespuestaBDValidada {
+  consultaExitosa: boolean
   respuestaRevisadaBD: IrespuestaBD
   descripcion: string
   mensaje: string
@@ -83,7 +85,7 @@ export interface IrespuestaBDValidada {
 
 export interface IvalidarParametrosConsulta {
   res: Response
-  numeroConsulta: string | number
+  numeroConsulta: any
   consultasEspeciales: IconsultasEspeciales
   parametros?: any[]
 }
@@ -94,6 +96,7 @@ export interface IconsultaDBconValidacionTotal {
 }
 export interface IparametrosYConsultaValidados {
   parametrosCorrectos: boolean
+  consultaCorrecta: boolean
   resultadosConsulta: RowDataPacket[] | undefined
   descripcion: string | undefined
 }
@@ -108,6 +111,11 @@ export interface IvalidacionParametros {
   consulta: IconsultaRespuesta
   mensaje?: string
   arregloParametros?: string[]
+}
+
+export interface IconsultarEnBDYValidar {
+  res: Response
+  parametrosValidados: IvalidacionParametros
 }
 export interface IencriptarContrasena {
   encriptacionExitosa: boolean

@@ -22,6 +22,7 @@ const consultaDBconValidacionTotal = async ({
   nuevoArregloParametros
 }: IconsultaDBconValidacionTotal): Promise<IparametrosYConsultaValidados> => {
   let parametrosCorrectos = false
+  let consultaCorrecta = false
   let descripcion: string | undefined
   let resultadosConsulta: RowDataPacket[] | undefined
 
@@ -35,15 +36,23 @@ const consultaDBconValidacionTotal = async ({
   if (parametrosValidados.parametrosCorrectos) {
     parametrosCorrectos = true
 
-    const respuestaBDValidada = await consultarEnBDYValidar(parametrosValidados)
+    const {
+      consultaExitosa,
+      descripcion: descripcionConsulta,
+      respuestaRevisadaBD
+    } = await consultarEnBDYValidar({
+      res,
+      parametrosValidados
+    })
 
-    descripcion = respuestaBDValidada.descripcion
-    resultadosConsulta = respuestaBDValidada.respuestaRevisadaBD
-      .datos as RowDataPacket[]
+    consultaCorrecta = consultaExitosa
+    descripcion = descripcionConsulta
+    resultadosConsulta = respuestaRevisadaBD.datos as RowDataPacket[]
   }
 
   const parametrosYConsultaValidados: IparametrosYConsultaValidados = {
     parametrosCorrectos,
+    consultaCorrecta,
     resultadosConsulta,
     descripcion
   }
@@ -58,14 +67,18 @@ const validarContrasenaUsuario = async ({
 }: IconsultarBDPOST): Promise<void> => {
   const { idUsuario, contrasenaIngresada } = body
 
-  const { parametrosCorrectos, resultadosConsulta, descripcion } =
-    await consultaDBconValidacionTotal({
-      res,
-      nuevoArregloParametros: [idUsuario, contrasenaIngresada],
-      nConsulta
-    })
+  const {
+    parametrosCorrectos,
+    consultaCorrecta,
+    resultadosConsulta,
+    descripcion
+  } = await consultaDBconValidacionTotal({
+    res,
+    nuevoArregloParametros: [idUsuario, contrasenaIngresada],
+    nConsulta
+  })
 
-  if (!parametrosCorrectos) {
+  if (!parametrosCorrectos || !consultaCorrecta) {
     return
   }
 
@@ -97,16 +110,20 @@ const cambiarContrasenaUsuario = async ({
     await encriptarContrasena(contrasena)
 
   if (encriptacionExitosa) {
-    const { parametrosCorrectos, descripcion: descripcionConsulta } =
-      await consultaDBconValidacionTotal({
-        res,
-        nuevoArregloParametros: [contrasenaHash, idUsuario],
-        nConsulta
-      })
+    const {
+      parametrosCorrectos,
+      consultaCorrecta,
+      descripcion: descripcionConsulta
+    } = await consultaDBconValidacionTotal({
+      res,
+      nuevoArregloParametros: [contrasenaHash, idUsuario],
+      nConsulta
+    })
 
-    if (!parametrosCorrectos) {
+    if (!parametrosCorrectos || !consultaCorrecta) {
       return
     }
+
     fallo = false
     mensaje = mensajesUsuario[3]
     descripcion = descripcionConsulta
@@ -132,17 +149,14 @@ const manejadorDeConsultas = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { numeroConsulta, parametro1, parametro2, parametro3 } = req.query
+  const { numeroConsulta, parametro1, parametro2, parametro3, parametro4 } =
+    req.query
 
   const parametrosValidados = validarParametrosConsulta({
     res,
-    numeroConsulta: numeroConsulta as string,
+    numeroConsulta,
     consultasEspeciales,
-    parametros: [
-      parametro1 as string,
-      parametro2 as string,
-      parametro3 as string
-    ]
+    parametros: [parametro1, parametro2, parametro3, parametro4]
   })
 
   if (!parametrosValidados.parametrosCorrectos) {
@@ -150,7 +164,14 @@ const manejadorDeConsultas = async (
   }
 
   if (parametrosValidados.consultaDeLectura) {
-    const respuestaBDValidada = await consultarEnBDYValidar(parametrosValidados)
+    const respuestaBDValidada = await consultarEnBDYValidar({
+      res,
+      parametrosValidados
+    })
+
+    if (!respuestaBDValidada.consultaExitosa) {
+      return
+    }
 
     enviarRespuesta({
       res,

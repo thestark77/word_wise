@@ -3,10 +3,10 @@ import type { OkPacket, RowDataPacket } from 'mysql2'
 import { db } from '../db/db'
 import type {
   IconsultarBD,
+  IconsultarEnBDYValidar,
   Imysql2Error,
   IrespuestaBD,
-  IrespuestaBDValidada,
-  IvalidacionParametros
+  IrespuestaBDValidada
 } from '../interfaces'
 import { validarRespuestaBD } from './auxiliar.functions'
 
@@ -41,15 +41,17 @@ const consultarEnBD = async ({
   return respuesta
 }
 
-const consultarEnBDYValidar = async (
-  parametrosValidados: IvalidacionParametros
-): Promise<IrespuestaBDValidada> => {
+const consultarEnBDYValidar = async ({
+  res,
+  parametrosValidados
+}: IconsultarEnBDYValidar): Promise<IrespuestaBDValidada> => {
   const respuestaBD = await consultarEnBD({
     consulta: parametrosValidados.consulta,
     arregloParametros: parametrosValidados.arregloParametros
   })
 
   const respuestaBDValidada = validarRespuestaBD({
+    res,
     respuestaBD,
     consultaDeLectura: parametrosValidados.consultaDeLectura
   })
