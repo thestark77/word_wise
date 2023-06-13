@@ -21,22 +21,6 @@ import { homeSharp } from 'ionicons/icons'
 import image from '../../assets/img/logo.svg'
 import { pestanasAplicacion } from '../../interfaces'
 import './Menu.css'
-// ;<IonMenuToggle key={index} autoHide={false}>
-//   <IonItem
-//     className={
-//       location.pathname === appPage.url
-//         ? 'selected ion-margin-vertical'
-//         : 'ion-margin-vertical'
-//     }
-//     routerLink={appPage.url}
-//     routerDirection='none'
-//     lines='none'
-//     detail={false}
-//   >
-//     <IonIcon slot='start' ios={appPage.iosIcon} md={appPage.mdIcon} />
-//     <IonLabel>{appPage.titulo}</IonLabel>
-//   </IonItem>
-// </IonMenuToggle>
 
 const Menu: React.FC = () => {
   return (
