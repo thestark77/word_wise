@@ -16,6 +16,7 @@
     "fixall": "npm run check && npm run prettier && npm run lint && npm run fix"
   },
   "dependencies": {
+    "@capacitor/android": "5.0.4",
     "@capacitor/app": "5.0.2",
     "@capacitor/core": "5.0.4",
     "@capacitor/haptics": "5.0.2",
