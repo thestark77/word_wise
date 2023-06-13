@@ -7,12 +7,10 @@ import {
   IonItem,
   IonLabel,
   IonMenuButton,
-  IonTitle,
   IonToolbar
 } from '@ionic/react'
 
 import avatar from '../../assets/img/avatar.svg'
-import { roles } from '../../interfaces'
 import './Header.css'
 
 const Header: React.FC = () => {
@@ -20,7 +18,6 @@ const Header: React.FC = () => {
     <IonHeader>
       <IonToolbar>
         <IonMenuButton slot='start' />
-        <IonTitle>{roles[1]}</IonTitle>
         <IonButtons slot='end'>
           <IonLabel>Jose Alejandro Salazar</IonLabel>
           <IonAccordionGroup>

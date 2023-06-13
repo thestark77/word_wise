@@ -28,6 +28,7 @@ import '@ionic/react/css/text-transformation.css'
 
 /* Theme variables */
 import Menu from './components/Menu/Menu'
+import { autorizarInicioSesion } from './controller/api.methods'
 import { roles } from './interfaces'
 import './theme/variables.css'
 
@@ -54,6 +55,17 @@ const App: React.FC = () => {
     }).catch((error) => {
       console.log(error)
     })
+
+    autorizarInicioSesion({
+      idUsuario: 1,
+      contrasenaIngresada: 'pingo'
+    })
+      .then((aprobado) => {
+        console.log(aprobado)
+      })
+      .catch((error) => {
+        console.log(error)
+      })
   }, [])
 
   return (
@@ -63,10 +75,16 @@ const App: React.FC = () => {
           <Menu />
           <IonRouterOutlet id='main'>
             <Route path='/' exact={true}>
-              <Redirect to={`/portal/${roles[1]}`} />
+              <Redirect to='/portal/Estudiante' />
             </Route>
-            <Route path={`/portal/${roles[1]}`} exact={true}>
-              <Portal />
+            <Route path={`/portal/${roles.estudiante}`} exact={true}>
+              <Portal rolUsuario={roles.estudiante} />
+            </Route>
+            <Route path={`/portal/${roles.docente}`} exact={true}>
+              <Portal rolUsuario={roles.docente} />
+            </Route>
+            <Route path={`/portal/${roles.administrativo}`} exact={true}>
+              <Portal rolUsuario={roles.administrativo} />
             </Route>
           </IonRouterOutlet>
         </IonSplitPane>

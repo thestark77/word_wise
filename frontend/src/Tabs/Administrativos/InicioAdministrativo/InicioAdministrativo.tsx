@@ -1,5 +1,5 @@
 import { IonContent } from '@ionic/react'
-import './PortalEstudiante.css'
+import './InicioAdministrativo.css'
 
 const PortalEstudiante: React.FC = () => {
   return <IonContent></IonContent>
