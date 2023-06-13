@@ -1,17 +1,11 @@
-import {
-  CreateAnimation,
-  IonContent,
-  IonFooter,
-  IonLabel,
-  IonPage
-} from '@ionic/react'
+import { CreateAnimation, IonContent, IonPage } from '@ionic/react'
 import React, { createRef, useEffect } from 'react'
 import logo from '../../assets/img/logo.svg'
 import AnimatedName from '../../components/AnimatedName/AnimatedName'
 import LoginForm from '../../components/LoginForm/LoginForm'
-import './Login.css'
+import './IniciarSesion.css'
 
-const Login: React.FC = () => {
+const IniciarSesion: React.FC = () => {
   const logoAnimation = createRef<CreateAnimation>()
   const footerAnimation = createRef<CreateAnimation>()
 
@@ -69,15 +63,9 @@ const Login: React.FC = () => {
           },
           { property: 'opacity', fromValue: '0', toValue: '1' }
         ]}
-      >
-        <IonFooter className='bg-image ion-text-center'>
-          <IonLabel color='primary'>
-            *Desarrollada por Sebastián Flórez Aguirre
-          </IonLabel>
-        </IonFooter>
-      </CreateAnimation>
+      ></CreateAnimation>
     </IonPage>
   )
 }
 
-export default React.memo(Login)
+export default React.memo(IniciarSesion)
