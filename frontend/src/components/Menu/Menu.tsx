@@ -52,10 +52,9 @@ const Menu: React.FC = () => {
               >
                 Programa académico
               </IonTitle>
-              <IonItem lines='full'>
+              <IonItem className='ion-margin-horizontal' lines='full'>
                 <IonSelect
                   placeholder='Selecciona tu programa'
-                  justify='start'
                   interface='popover'
                 >
                   <IonSelectOption value='brown'>
