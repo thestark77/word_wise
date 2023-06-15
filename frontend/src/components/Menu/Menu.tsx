@@ -18,13 +18,42 @@ import {
   IonToolbar
 } from '@ionic/react'
 import { homeSharp } from 'ionicons/icons'
+import { useLocation } from 'react-router'
 import image from '../../assets/img/logo.svg'
-import { pestanasAplicacion } from '../../interfaces'
+import {
+  pestanasAdministrativo,
+  pestanasDocente,
+  pestanasEstudiante,
+  type Ipestanas
+} from '../../interfaces'
 import './Menu.css'
+export interface ImenuProps {
+  setOpcionSeleccionada: (opcionSeleccionada: number) => void
+  rolUsuario: number
+}
 
-const Menu: React.FC = () => {
+export type IlistaPestanas = Record<number, Ipestanas[]>
+
+const pestanas: IlistaPestanas = {
+  1: pestanasEstudiante,
+  2: pestanasDocente,
+  3: pestanasAdministrativo
+}
+
+const Menu: React.FC<ImenuProps> = ({ setOpcionSeleccionada, rolUsuario }) => {
+  let contadorSubpaneles = 0
+  const location = useLocation()
+
+  const seleccionarOpcion = (contadorSubpaneles: number): void => {
+    setOpcionSeleccionada(contadorSubpaneles)
+  }
+
   return (
-    <IonMenu disabled={false} contentId='main' type='overlay'>
+    <IonMenu
+      disabled={location.pathname === '/portal/login'}
+      contentId='main'
+      type='overlay'
+    >
       <IonHeader>
         <IonToolbar>
           <IonGrid>
@@ -75,7 +104,9 @@ const Menu: React.FC = () => {
             <IonCol className='margenVertical ion-margin-horizontal'>
               <IonItem
                 className='inicio'
-                routerLink='/portal/login'
+                onClick={() => {
+                  seleccionarOpcion(1)
+                }}
                 color='light'
                 lines='none'
                 detail={false}
@@ -88,18 +119,13 @@ const Menu: React.FC = () => {
           <IonRow>
             <IonCol className='ion-margin-horizontal'>
               <IonAccordionGroup multiple={true}>
-                {pestanasAplicacion.map((pagina, index) => {
+                {pestanas[rolUsuario].map((pagina, index) => {
                   return (
                     <IonAccordion
                       key={index}
                       className='accordion margenVertical'
                     >
-                      <IonItem
-                        slot='header'
-                        color='light'
-                        lines='none'
-                        detail={false}
-                      >
+                      <IonItem slot='header' color='light' lines='none'>
                         <IonIcon
                           slot='start'
                           ios={pagina.iosIcon}
@@ -110,13 +136,17 @@ const Menu: React.FC = () => {
                         </IonLabel>
                       </IonItem>
                       {pagina.subpaneles.map((subpanel, index) => {
+                        contadorSubpaneles += 1
+
                         return (
                           <IonItem
                             key={index}
+                            onClick={() => {
+                              seleccionarOpcion(contadorSubpaneles)
+                            }}
                             className='ion-margin'
                             slot='content'
                             lines='full'
-                            // onClick={}
                           >
                             <IonLabel>{subpanel}</IonLabel>
                           </IonItem>
@@ -130,7 +160,11 @@ const Menu: React.FC = () => {
           </IonRow>
           <IonRow class='logout ion-margin-horizontal ion-padding-top'>
             <IonCol>
-              <IonButton className='button' expand='block'>
+              <IonButton
+                routerLink='/portal/login'
+                className='button'
+                expand='block'
+              >
                 Cerrar sesión
               </IonButton>
             </IonCol>

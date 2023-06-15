@@ -3,12 +3,11 @@
 # dependencies
 node_modules
 package-lock.json
-
+production
 
 # production
 build
 dist
-
 
 # misc
 *.env
